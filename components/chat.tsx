@@ -11,6 +11,8 @@ import { UserChatBox } from "@/components/chat-user";
 import axios from "axios";
 import { set } from "zod";
 
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+
 interface ChatProps {
   text: string;
   type: string;
@@ -73,7 +75,8 @@ export const Chat = () => {
               <h3 className="grow text-xl font-semibold">AI Chat</h3>
               <X onClick={() => setChat(!chat)} />
             </div>
-            <div className="grow px-10 pt-10 overflow-y-scroll">
+            <ScrollArea className="grow">
+            <div className="px-10 pt-10">
               <div className="gap-5 flex flex-col" ref={chatRef}>
                 <AIChatBox AIText="Welcome to the Ai Teach! What can I help you with?" />
                 {messages.map((message, index) => {
@@ -84,6 +87,8 @@ export const Chat = () => {
                 })}
               </div>
             </div>
+            <ScrollBar orientation="vertical" />
+            </ScrollArea>
             <div className="relative mx-10 mb-10 mt-5">
               <input
                 type="text"

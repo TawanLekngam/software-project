@@ -31,7 +31,7 @@ const CourseHero = ({ course, userId, enroll }: CourseHeroProps) => {
       <div className="flex flex-col w-screen items-center justify-center p-6 lg:flex-row bg-white">
         <div className="max-w-xs lg:max-w-md">
           <Image
-            src={course.imageUrl!}
+            src={course.imageUrl ?? "./_componets/default.svg"}
             alt={"${course.title} Image"}
             className="rounded-xl"
             width={200}
@@ -73,8 +73,8 @@ const CourseHero = ({ course, userId, enroll }: CourseHeroProps) => {
                 <Button variant="outline">Edit Course</Button>
               </Link>
             )}
-            {course.isPublished ? ( // Check if course is published
-              enroll === userId && userId != course.userId ? ( // Check if user is already enrolled
+            {course.isPublished && userId != course.userId ? ( // Check if course is published
+              enroll === userId ? ( // Check if user is already enrolled
                 <Button variant="primary" disabled>
                   Already Enrolled
                 </Button>

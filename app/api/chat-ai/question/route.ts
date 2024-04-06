@@ -15,39 +15,39 @@ export async function POST(req: Request) {
     );
 
     const answer1Completion = await getCompletion(
-      `create a wrong question for ${questionCompletion}`
+      `create a correct answer for ${questionCompletion}`
     );
 
     const answer2Completion = await getCompletion(
-      `create a wrong question for ${questionCompletion}`
+      `create a wrong answer for ${questionCompletion}`
     );
 
     const answer3Completion = await getCompletion(
-      `create a  wrong  question for ${questionCompletion}`
+      `create a  wrong  answer for ${questionCompletion}`
     );
 
     const answer4Completion = await getCompletion(
-      `create a  wrong question for ${questionCompletion}`
+      `create a  wrong answer for ${questionCompletion}`
     );
 
     const question: QuestionDTO = {
       question: questionCompletion,
       answers: [
         {
-          answer: answer1Completion,
+          text: answer1Completion,
           isCorrect: true,
         },
         {
-          answer: answer2Completion,
+          text: answer2Completion,
           isCorrect: false,
         },
         {
-          answer: answer3Completion,
+          text: answer3Completion,
           isCorrect: false,
         },
         {
-          answer: answer4Completion,
-          isCorrect: true,
+          text: answer4Completion,
+          isCorrect: false,
         },
       ],
     };

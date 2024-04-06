@@ -28,9 +28,13 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const values = await req.json(); 
+
     const flashcard = await db.flashcard.create({
       data: {
         flashcarddeckId: params.flashcarddeckId,
+        front: values.front,
+        back: values.back, 
       },
     });
     return NextResponse.json(flashcard);

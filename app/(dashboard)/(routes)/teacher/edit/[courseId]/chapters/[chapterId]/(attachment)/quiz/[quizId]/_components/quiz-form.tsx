@@ -11,6 +11,7 @@ import { PlusCircle, Pencil } from "lucide-react"
 
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Button } from "@/components/ui/button"
 
@@ -24,6 +25,16 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel"
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 import React from "react"
 
@@ -44,9 +55,9 @@ export const QuizForm = ({
   const [questions, setQuestions] = useState<
     (Question & { answers: Answer[] })[]
   >(JSON.parse(JSON.stringify(data)))
-  const [api, setApi] = React.useState<CarouselApi>()
-  const [current, setCurrent] = React.useState(questions.length != 0 ? 1 : 0)
-  const [count, setCount] = React.useState(questions.length)
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(questions.length != 0 ? 1 : 0)
+  const [count, setCount] = useState(questions.length)
 
   const [isEditing, setIsEditing] = useState(false)
   const [answers, setAnswers] = useState<string[]>(
@@ -55,13 +66,43 @@ export const QuizForm = ({
   const [selectedValue, setSelectedValue] = useState("")
   const [correctAnswer, setCorrectAnswer] = useState("")
 
+  const [keyword, setKeyword] = useState("")
+  const [open, setOpen] = useState(false)
+
+  const router = useRouter()
+
+  const toggleEdit = () => setIsEditing((current) => !current)
+
   const handleRadioChange = (event: {
     target: { value: SetStateAction<string> }
   }) => {
     setSelectedValue(event.target.value)
   }
 
-  const toggleEdit = () => setIsEditing((current) => !current)
+  const move = () => {
+    setSelectedValue(api ? answers[api.selectedScrollSnap()] : "5")
+    setCorrectAnswer(api ? answers[api.selectedScrollSnap()] : "5")
+  }
+
+  const updateQuestion = (index: number, newValue: string) => {
+    setQuestions((prevItems: (Question & { answers: Answer[] })[]) => {
+      const updatedItems: (Question & { answers: Answer[] })[] = [...prevItems]
+      updatedItems[index].text = newValue
+      return updatedItems
+    })
+  }
+
+  const updateAnswerAtIndex = (
+    indexQ: number,
+    indexA: number,
+    newValue: string
+  ) => {
+    setQuestions((prevItems: (Question & { answers: Answer[] })[]) => {
+      const updatedItems: (Question & { answers: Answer[] })[] = [...prevItems]
+      updatedItems[indexQ].answers[indexA].text = newValue
+      return updatedItems
+    })
+  }
 
   const onCancel = (index: number) => {
     setQuestions((prevItems: (Question & { answers: Answer[] })[]) => {
@@ -74,15 +115,109 @@ export const QuizForm = ({
     toggleEdit()
   }
 
-  const move = () => {
-    setSelectedValue(api ? answers[api.selectedScrollSnap()] : "5")
-    setCorrectAnswer(api ? answers[api.selectedScrollSnap()] : "5")
+  const createQuestion = async (keyword: string) => {
+    try {
+      let value = {
+        message: keyword,
+      }
+      let result = await axios.post(`/api/chat-ai/question`, value)
+
+      setOpen(false)
+      setKeyword("")
+      await handleQuestionAdd(result.data.question, result.data.answers)
+    } catch {
+      toast.error("Something went wrong")
+    }
+  }
+
+  const handleQuestionAdd = async (question: any, answerSet: any) => {
+    let newQuestion
+    let result
+    let valueQ = {
+      question: question,
+    }
+
+    try {
+      toast.loading("Creating question...")
+      result = await axios.post(
+        `/api/courses/${courseId}/chapters/${chapterId}/questionset/${questionsetId}/questions`,
+        valueQ
+      )
+      // console.log(values.answers)
+      newQuestion = await result.data
+      for (let i = 0; i < 4; i++) {
+        let valueA = {
+          text: answerSet ? answerSet[i].text : null,
+          isCorrect: answerSet ? answerSet[i].isCorrect : false,
+        }
+
+        let answer = await axios.post(
+          `/api/courses/${courseId}/chapters/${chapterId}/questionset/${questionsetId}/questions/${newQuestion.id}/answers`,
+          valueA
+        )
+        newQuestion.answers.push(await answer.data)
+      }
+      toast.dismiss()
+      toast.success("Question created")
+
+      setQuestions([newQuestion, ...questions])
+      setData([newQuestion, ...questions])
+      setCount(count + 1)
+      answerSet
+        ? (setAnswers(["0", ...answers]),
+          setSelectedValue("0"),
+          setCorrectAnswer("0"))
+        : (setAnswers(["5", ...answers]),
+          setSelectedValue("5"),
+          setCorrectAnswer("5"))
+      api?.scrollTo(0)
+
+      router.refresh()
+    } catch {
+      toast.error("Something went wrong")
+    }
+  }
+
+  const handleQuestionRemove = async (index: number) => {
+    try {
+      toast.loading("Deleting question...")
+      let questionId = questions[index].id
+
+      await axios.delete(
+        `/api/courses/${courseId}/chapters/${chapterId}/questionset/${questionsetId}/questions/${questionId}`
+      )
+      toast.dismiss()
+      toast.success("Question deleted")
+      router.refresh()
+    } catch {
+      toast.error("Something went wrong")
+    }
+    questions.splice(index, 1)
+    answers.splice(index, 1)
+    setCount(questions.length)
+    questions.length == 0
+      ? setCurrent(0)
+      : index == questions.length
+      ? setCurrent(current - 1)
+      : setCurrent(current)
+    move()
+    toggleEdit()
+  }
+
+  const handleQuestionEdit = (index: number) => {
+    questions[index].answers?.map((answer: Answer, index: number) => {
+      answer.isCorrect
+        ? (setSelectedValue(String(index)), setCorrectAnswer(String(index)))
+        : null
+    })
+    toggleEdit()
   }
 
   const onSubmit = async (index: number) => {
     let question = questions[index]
     let questionId = question.id
     try {
+      toast.loading("Updating question...")
       let valueQuestion = { text: questions[index].text }
       await axios.patch(
         `/api/courses/${courseId}/chapters/${chapterId}/questionset/${questionsetId}/questions/${questionId}`,
@@ -108,65 +243,13 @@ export const QuizForm = ({
       setData(JSON.parse(JSON.stringify(questions)))
       answers[index] = selectedValue
       setCorrectAnswer(selectedValue)
+      toast.dismiss()
       toast.success("Question updated")
       toggleEdit()
       router.refresh()
     } catch {
       toast.error("Something went wrong")
     }
-  }
-
-  const updateQuestion = (index: number, newValue: string) => {
-    setQuestions((prevItems: (Question & { answers: Answer[] })[]) => {
-      const updatedItems: (Question & { answers: Answer[] })[] = [...prevItems]
-      updatedItems[index].text = newValue
-      return updatedItems
-    })
-  }
-
-  const updateAnswerAtIndex = (
-    indexQ: number,
-    indexA: number,
-    newValue: string
-  ) => {
-    setQuestions((prevItems: (Question & { answers: Answer[] })[]) => {
-      const updatedItems: (Question & { answers: Answer[] })[] = [...prevItems]
-      updatedItems[indexQ].answers[indexA].text = newValue
-      return updatedItems
-    })
-  }
-
-  const handleQuestionEdit = (index: number) => {
-    questions[index].answers?.map((answer: Answer, index: number) => {
-      answer.isCorrect
-        ? (setSelectedValue(String(index)), setCorrectAnswer(String(index)))
-        : null
-    })
-    toggleEdit()
-  }
-
-  const handleQuestionRemove = async (index: number) => {
-    try {
-      let questionId = questions[index].id
-
-      await axios.delete(
-        `/api/courses/${courseId}/chapters/${chapterId}/questionset/${questionsetId}/questions/${questionId}`
-      )
-      toast.success("Question deleted")
-      router.refresh()
-    } catch {
-      toast.error("Something went wrong")
-    }
-    questions.splice(index, 1)
-    answers.splice(index, 1)
-    setCount(questions.length)
-    questions.length == 0
-      ? setCurrent(0)
-      : index == questions.length
-      ? setCurrent(current - 1)
-      : setCurrent(current)
-    move()
-    toggleEdit()
   }
 
   React.useEffect(() => {
@@ -187,46 +270,53 @@ export const QuizForm = ({
     })
     setSelectedValue(answers[0])
     setCorrectAnswer(answers[0])
-    console.log(answers)
   }, [api])
-
-  const router = useRouter()
-
-  const handleQuestionAdd = async () => {
-    let newQuestion
-    try {
-      let result = await axios.post(
-        `/api/courses/${courseId}/chapters/${chapterId}/questionset/${questionsetId}/questions`
-      )
-
-      newQuestion = await result.data
-      for (let i = 0; i < 4; i++) {
-        let answer = await axios.post(
-          `/api/courses/${courseId}/chapters/${chapterId}/questionset/${questionsetId}/questions/${newQuestion.id}/answers`
-        )
-        newQuestion.answers.push(await answer.data)
-      }
-      toast.success("Question created")
-      router.refresh()
-    } catch {
-      toast.error("Something went wrong")
-    }
-    setQuestions([newQuestion, ...questions])
-    setCount(count + 1)
-    setAnswers(["5", ...answers])
-    setSelectedValue("5")
-    setCorrectAnswer("5")
-    api?.scrollTo(0)
-  }
 
   return (
     <div className="w-4/5 flex flex-col self-center gap-8">
       <div className="flex flex-col gap-4 justify-between md:grid md:grid-cols-3">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button variant="primary" disabled={isEditing}>
+              Create with Keyword by AI
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader className="gap-2 pt-2">
+              <DialogTitle>Create new question by AI</DialogTitle>
+              {/* <DialogDescription>
+                Write a keyword to create a new flash card
+              </DialogDescription> */}
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <Label htmlFor="name" className="text-left">
+                Keyword
+              </Label>
+              <Input
+                id="name"
+                placeholder="e.g. 'Keyword'"
+                className="col-span-3"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm_l"
+                onClick={(e) => createQuestion(keyword)}
+              >
+                Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         <div className="text-center text-xl col-start-1 md:col-start-2">
           Question {current} of {count}
         </div>
         <Button
-          onClick={(e) => handleQuestionAdd()}
+          onClick={(e) => handleQuestionAdd(null, null)}
           variant="underline"
           size="ghost"
           className="justify-self-end col-start-3"

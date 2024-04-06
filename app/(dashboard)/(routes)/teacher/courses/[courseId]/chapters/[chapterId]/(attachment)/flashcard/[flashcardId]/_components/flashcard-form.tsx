@@ -1,16 +1,27 @@
 "use client";
 
-import axios from "axios";
-import { PlusCircle } from "lucide-react";
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { Flashcard } from "@prisma/client";
+import axios from "axios"
+import { PlusCircle } from "lucide-react"
+import { useState } from "react"
+import toast from "react-hot-toast"
+import { useRouter } from "next/navigation"
+import { Flashcard } from "@prisma/client"
 
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
 
 interface FlashcardFormProps {
   initialData: Flashcard[];
@@ -31,9 +42,28 @@ export const FlashcardForm = ({
   const [back, setBack] = useState(cards[clickedCard]?.back || null);
   const [isEditing, setIsEditing] = useState(false);
 
-  const router = useRouter();
+  const [keyword, setKeyword] = useState("")
+
+  const router = useRouter()
 
   const toggleEdit = () => setIsEditing((current) => !current);
+
+  const createFlashcard = async (keyword: string) => {
+    try {
+      let value = {
+        message: keyword,
+      }
+      let result = await axios.post(`/api/chat-ai/flashcard`, value)
+      console.log(result.data.back, result.data.front)
+      // setKeyword("")
+      // handleFlashcardAdd()
+      // handleFlashcardSave(cards.length, keyword, result.data.front)
+      toast.success("Flashcard created")
+      router.refresh()
+    } catch {
+      toast.error("Something went wrong")
+    }
+  }
 
   const handleFlashcardAdd = async () => {
     let newCard;
@@ -65,8 +95,9 @@ export const FlashcardForm = ({
       let value = {
         front: front,
         back: back,
-      };
-      let flashcardId = cards[index].id;
+      }
+      console.log(value)
+      let flashcardId = cards[index].id
       let result = await axios.patch(
         `/api/courses/${courseId}/chapters/${chapterId}/flashcarddecks/${flashcarddeckId}/flashcard/${flashcardId}`,
         value
@@ -112,6 +143,43 @@ export const FlashcardForm = ({
   return (
     <div className="flex flex-col-reverse items-center lg:items-start gap-8 lg:flex-row">
       <div className="flex flex-col gap-4 w-full max-w-sm lg:max-w-xs">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="primary">Create with Keyword by AI </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader className="gap-2 pt-2">
+              <DialogTitle>Create new flash card by AI</DialogTitle>
+              <DialogDescription>
+                Write a word on the front side to create a new flash card
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              {/* <div className="grid grid-cols-4 items-center gap-4"> */}
+              <Label htmlFor="name" className="text-left">
+                Front side
+              </Label>
+              <Input
+                id="name"
+                placeholder="e.g. 'Keyword'"
+                className="col-span-3"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+              />
+              {/* </div> */}
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm_l"
+                onClick={(e) => createFlashcard(keyword)}
+              >
+                Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         <div className="flex flex-row justify-between">
           <h3 className="text-lg font-medium">Card list</h3>
           <Button
@@ -132,7 +200,6 @@ export const FlashcardForm = ({
               <>
                 <button
                   key={index}
-                  // disabled={isEditing}
                   className={`font-medium p-4 h-[56px] rounded-md ${
                     clickedCard === index
                       ? "bg-[#80489C]/90 text-white"
@@ -181,12 +248,12 @@ export const FlashcardForm = ({
                   <div className="w-full max-w-[440px] h-[280px] mb-4">
                     <TabsContent
                       value="front"
-                      className="w-full bg-[#80489C] bg-opacity-90 h-full rounded-md px-8 pt-6 pb-8"
+                      className="w-full bg-white border-[#4F46E5] border-4 h-full rounded-md px-8 pt-6 pb-8"
                     >
                       <div
                         className={cn(
-                          "text-2xl font-medium text-center text-white place-content-center grid overflow-y-auto h-[208px]",
-                          !(front != null) && "text-lg italic"
+                          "text-2xl font-medium text-center place-content-center grid overflow-y-auto h-[208px]",
+                          !(front != null) && "text-lg text-slate-500 italic"
                         )}
                       >
                         {front || "No front side description"}
@@ -232,14 +299,14 @@ export const FlashcardForm = ({
                   <div className=" h-[280px] w-full max-w-[440px] mb-4">
                     <TabsContent
                       value="front"
-                      className="w-full h-full bg-[#80489C] bg-opacity-90 rounded-md px-8 py-8 "
+                      className="w-full h-full bg-white border-[#4F46E5] border-4 rounded-md px-8 py-8 "
                     >
                       <Textarea
                         // disabled={isSubmitting}
                         placeholder="e.g. 'Flash card'"
                         value={front ? front : ""}
                         onChange={(e) => setFront(e.target.value)}
-                        className="h-full text-center text-2xl bg-transparent border-[#80489C] text-white placeholder:text-white"
+                        className="h-full text-center text-2xl"
                       />
                     </TabsContent>
                     <TabsContent

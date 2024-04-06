@@ -11,7 +11,7 @@ export async function POST(
 ) {
   try {
     const { userId } = auth();
-    // const { text } = await req.json();
+
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
@@ -26,11 +26,13 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const values = await req.json();
+    console.log("[ANSWER]", values);
     const answer = await db.answer.create({
       data: {
         questionId: params.questionId,
-        // text: text,
-        isCorrect: false,
+        text: values.text || null,
+        isCorrect: values.isCorrect || false,
       },
     });
 

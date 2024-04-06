@@ -39,7 +39,7 @@ export const CreateAttachment = ({ courseId, chapterId }: AttachmentProps) => {
       const createdId = response.data.id;
 
       let endpointType = type;
-      if (endpointType === "questionset") {
+      if (type === "questionset") {
         endpointType = "quiz";
       } else {
         endpointType = type.slice(0, -1);

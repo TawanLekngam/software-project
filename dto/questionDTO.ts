@@ -2,19 +2,19 @@ export interface QuestionDTO {
   question: string;
   answers: [
     {
-      answer: string;
+      text: string;
       isCorrect: boolean;
     },
     {
-      answer: string;
+      text: string;
       isCorrect: boolean;
     },
     {
-      answer: string;
+      text: string;
       isCorrect: boolean;
     },
     {
-      answer: string;
+      text: string;
       isCorrect: boolean;
     }
   ];

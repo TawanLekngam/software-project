@@ -175,11 +175,11 @@ model MuxData {
 }
 
 model Video {
-  id          String  @id @default(uuid())
-  title       String? @db.Text
-  description String? @db.Text
-  videoUrl    String? @db.Text
-  isPublished Boolean @default(false)
+  id          String    @id @default(uuid())
+  title       String?
+  description String?
+  videoUrl    String?
+  isPublished Boolean   @default(false)
   position    Int
   chapterId   String
   createdAt   DateTime  @default(now())
@@ -197,4 +197,9 @@ model TakeQuiz {
   maxScore      Int
   questionSetId String
   createdAt     DateTime @default(now())
+}
+
+model UserProfile {
+  userId      String  @id
+  description String?
 }

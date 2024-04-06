@@ -59,7 +59,7 @@ export const Actions = ({
       setIsLoading(true);
 
       await axios.delete(
-        `/api/courses/${courseId}/chapters/${chapterId}/video/${videoId}`
+        `/api/courses/${courseId}/chapters/${chapterId}/videos/${videoId}`
       );
 
       toast.success("Video deleted");
