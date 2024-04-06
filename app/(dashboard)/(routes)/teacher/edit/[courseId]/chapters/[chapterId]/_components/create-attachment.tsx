@@ -38,7 +38,12 @@ export const CreateAttachment = ({ courseId, chapterId }: AttachmentProps) => {
 
       const createdId = response.data.id;
 
-      let endpointType = type.slice(0, -1);
+      let endpointType = type;
+      if (endpointType === "questionset") {
+        endpointType = "quiz";
+      } else {
+        endpointType = type.slice(0, -1);
+      }
       router.push(
         `/teacher/edit/${courseId}/chapters/${chapterId}/${endpointType}/${createdId}`
       );
