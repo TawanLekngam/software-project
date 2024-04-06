@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
 
 export const Navbar = () => {
   const [navbar, setNavbar] = useState(false)
-  const [state, setState] = useState("")
+  const [state, setState] = useState("home")
 
   return (
     <nav className="sticky top-0 z-10 w-full bg-white shadow">

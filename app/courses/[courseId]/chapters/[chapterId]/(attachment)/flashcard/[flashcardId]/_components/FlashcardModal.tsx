@@ -56,7 +56,7 @@ const FlashcardModal: React.FunctionComponent<ScoreModalProps> = ({
             }}
             className="px-4 py-2 bg-red-500 hover:bg-red-700 text-white font-bold rounded-md w-full"
           >
-            Leave this quiz
+            Leave this flashcard
           </button>
         </div>
       </DialogContent>

@@ -1,29 +1,29 @@
-import { auth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
-import { CheckCircle, Clock } from "lucide-react";
+import { auth } from "@clerk/nextjs"
+import { redirect } from "next/navigation"
+import { CheckCircle, Clock } from "lucide-react"
 
-import Image from "next/image";
-import HeroPic from "./_components/hero.svg";
-import Levelup from "./_components/levelup.svg";
-import Feedback from "./_components/feedback.svg";
-import Quiz from "./_components/quiz.svg";
+import Image from "next/image"
+import HeroPic from "./_components/hero.svg"
+import Levelup from "./_components/levelup.svg"
+import Feedback from "./_components/feedback.svg"
+import Quiz from "./_components/quiz.svg"
 
-import { Slider } from "@/components/slider";
+import { Slider } from "@/components/slider"
 
-import { db } from "@/lib/db";
-import { getRecommendCourses } from "@/actions/get-recomment-course";
-import { ChapterBox } from "@/app/courses/[courseId]/chapters/[chapterId]/_components/chapter-box";
+import { db } from "@/lib/db"
+import { getRecommendCourses } from "@/actions/get-recommended-course"
+import { ChapterBox } from "@/app/courses/[courseId]/chapters/[chapterId]/_components/chapter-box"
 
 export default async function Dashboard() {
-  const { userId } = auth();
+  const { userId } = auth()
 
   if (!userId) {
-    return redirect("/");
+    return redirect("/")
   }
 
   const courses = await getRecommendCourses({
     userId,
-  });
+  })
 
   return (
     <>
@@ -81,7 +81,7 @@ export default async function Dashboard() {
           </div>
           <div className="grid grid-col items-center gap-y-4 lg:gap-y-8 lg:col-span-2 xl:mt-12 ">
             <h2 className="text-2xl text-center text-[#4B4B4B] font-semibold">
-              Review with quiz
+              Review with <br /> quiz and flashcard
             </h2>
             <Image
               className="w-[160px] md:w-[200px] justify-self-center"
@@ -92,5 +92,5 @@ export default async function Dashboard() {
         </div>
       </section>
     </>
-  );
+  )
 }

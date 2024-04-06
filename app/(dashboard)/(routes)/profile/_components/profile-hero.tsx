@@ -58,13 +58,13 @@ export const ProfileHero = ({
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-12 justify-center items-center lg:items-start ">
-      <img
-        className="rounded-full"
-        width={200}
-        height={200}
-        src={pic ? pic : Profile}
-        alt={"Profile"}
-      />
+      <div className="w-[200px] h-[200px]">
+        <img
+          className="rounded-full w-full h-full object-cover"
+          src={pic ? pic : Profile}
+          alt={"Profile"}
+        />
+      </div>
       <div className="flex flex-col items-center lg:items-start gap-4 max-w-[600px] lg:max-w-none lg:w-[600px]">
         <h1 className="text-[32px] font-extrabold text-primary">
           {firstName} {lastName}

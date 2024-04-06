@@ -1,15 +1,15 @@
-"use client";
+"use client"
 
-import React, { useState } from "react";
-import { Course, Chapter } from "@prisma/client";
-import { ChapterCarousel } from "./chapter-carousel";
-import { ChapterTitleForm } from "./chapter-title";
+import React, { useState } from "react"
+import { Course, Chapter } from "@prisma/client"
+import { ChapterCarousel } from "./chapter-carousel"
+import { ChapterTitleForm } from "./chapter-title"
 
 interface ChapterNavbarProps {
   course: Course & {
-    chapters: Chapter[];
-  };
-  initialChapterIndex: number; // Add a prop for the initial chapter index
+    chapters: Chapter[]
+  }
+  initialChapterIndex: number // Add a prop for the initial chapter index
 }
 
 export const ChapterNavbar = ({
@@ -17,14 +17,14 @@ export const ChapterNavbar = ({
   initialChapterIndex,
 }: ChapterNavbarProps) => {
   const [selectedChapterIndex, setSelectedChapterIndex] =
-    useState(initialChapterIndex);
+    useState(initialChapterIndex)
 
   const handleChapterChange = (index: number) => {
-    setSelectedChapterIndex(index);
-  };
+    setSelectedChapterIndex(index)
+  }
 
   return (
-    <div className="flex-col w-full justify-center px-12">
+    <div className="flex-col w-full justify-center px-12 pt-4">
       <div className="mx-auto flex flex-wrap justify-center">
         <ChapterCarousel
           course={course}
@@ -40,7 +40,7 @@ export const ChapterNavbar = ({
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ChapterNavbar;
+export default ChapterNavbar

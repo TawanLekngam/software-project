@@ -1,14 +1,14 @@
-"use client";
+"use client"
 
-import * as z from "zod";
-import axios from "axios";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Pencil } from "lucide-react";
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { Course } from "@prisma/client";
+import * as z from "zod"
+import axios from "axios"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { Pencil } from "lucide-react"
+import { useState } from "react"
+import toast from "react-hot-toast"
+import { useRouter } from "next/navigation"
+import { Course } from "@prisma/client"
 
 import {
   Form,
@@ -16,58 +16,58 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/components/ui/form"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { Textarea } from "@/components/ui/textarea"
 
 interface DescriptionFormProps {
-  initialData: Course;
-  courseId: string;
+  initialData: Course
+  courseId: string
 }
 
 const formSchema = z.object({
   description: z.string().min(1, {
     message: "Description is required",
   }),
-});
+})
 
 export const DescriptionForm = ({
   initialData,
   courseId,
 }: DescriptionFormProps) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false)
 
-  const toggleEdit = () => setIsEditing((current) => !current);
+  const toggleEdit = () => setIsEditing((current) => !current)
 
-  const router = useRouter();
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: initialData?.description || "",
     },
-  });
+  })
 
-  const { isSubmitting, isValid } = form.formState;
+  const { isSubmitting, isValid } = form.formState
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.patch(`/api/courses/${courseId}`, values);
-      toast.success("Course updated");
-      toggleEdit();
-      router.refresh();
+      await axios.patch(`/api/courses/${courseId}`, values)
+      toast.success("Course updated")
+      toggleEdit()
+      router.refresh()
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Something went wrong")
     }
-  };
+  }
 
   return (
-    <div className="flex-row max-w-[720px]">
+    <div className="flex flex-col max-w-[720px]">
       {!isEditing && (
         <p
           className={cn(
-            "text-sm font-medium text-center lg:text-base lg:text-start",
+            "text-sm font-medium text-center lg:text-base lg:text-start pt-4",
             !initialData.description && "text-slate-500 italic"
           )}
         >
@@ -90,7 +90,7 @@ export const DescriptionForm = ({
                       disabled={isSubmitting}
                       placeholder="e.g. 'This course is about...'"
                       {...field}
-                      className="sm:min-w-[200px] md:min-w-[500px] lg:max-w-[720px]"
+                      className="min-w-[270px] sm:min-w-[500px] lg:max-w-[720px]"
                     />
                   </FormControl>
                   <FormMessage />
@@ -98,10 +98,14 @@ export const DescriptionForm = ({
               )}
             />
             <div className="flex items-center gap-x-2 justify-end">
-              <Button disabled={!isValid || isSubmitting} type="submit" variant="primary">
+              <Button
+                disabled={!isValid || isSubmitting}
+                type="submit"
+                variant="primary"
+              >
                 Save
               </Button>
-              <Button onClick={toggleEdit} variant="ghost">
+              <Button onClick={toggleEdit} variant="outline">
                 Cancel
               </Button>
             </div>
@@ -109,10 +113,16 @@ export const DescriptionForm = ({
         </Form>
       )}
       {!isEditing && (
-        <Button onClick={toggleEdit} variant="ghost">
-          <Pencil className="h-4 w-4" />
+        <Button
+          onClick={toggleEdit}
+          variant="underline"
+          size="ghost"
+          className="pt-2 lg:self-start self-center"
+        >
+          <Pencil className="h-4 w-4 mr-2" />
+          Edit Description
         </Button>
       )}
     </div>
-  );
-};
+  )
+}
