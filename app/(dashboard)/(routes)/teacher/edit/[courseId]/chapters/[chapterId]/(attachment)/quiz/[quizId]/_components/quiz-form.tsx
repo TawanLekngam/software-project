@@ -67,7 +67,8 @@ export const QuizForm = ({
   const [correctAnswer, setCorrectAnswer] = useState("")
 
   const [keyword, setKeyword] = useState("")
-  const [open, setOpen] = useState(false)
+  const [openK, setOpenK] = useState(false)
+  const [openD, setOpenD] = useState(false)
 
   const router = useRouter()
 
@@ -115,14 +116,14 @@ export const QuizForm = ({
     toggleEdit()
   }
 
-  const createQuestion = async (keyword: string) => {
+  const createQuestionFromKeyword = async (keyword: string) => {
     try {
       let value = {
         message: keyword,
       }
       let result = await axios.post(`/api/chat-ai/question`, value)
 
-      setOpen(false)
+      setOpenK(false)
       setKeyword("")
       await handleQuestionAdd(result.data.question, result.data.answers)
     } catch {
@@ -274,44 +275,86 @@ export const QuizForm = ({
 
   return (
     <div className="w-4/5 flex flex-col self-center gap-8">
-      <div className="flex flex-col gap-4 justify-between md:grid md:grid-cols-3">
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button variant="primary" disabled={isEditing}>
-              Create with Keyword by AI
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader className="gap-2 pt-2">
-              <DialogTitle>Create new question by AI</DialogTitle>
-              {/* <DialogDescription>
-                Write a keyword to create a new flash card
-              </DialogDescription> */}
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <Label htmlFor="name" className="text-left">
+      <div className="flex flex-col md:flex-row items-center gap-4">
+        <h3 className="text-lg font-medium">Create Question with AI from:</h3>
+        <div className="flex flex-row gap-4">
+          <Dialog open={openK} onOpenChange={setOpenK}>
+            <DialogTrigger asChild>
+              <Button variant="cancel" disabled={isEditing}>
                 Keyword
-              </Label>
-              <Input
-                id="name"
-                placeholder="e.g. 'Keyword'"
-                className="col-span-3"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                type="submit"
-                variant="primary"
-                size="sm_l"
-                onClick={(e) => createQuestion(keyword)}
-              >
-                Save
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader className="gap-2 pt-2">
+                <DialogTitle>Create Question with AI</DialogTitle>
+                <DialogDescription>
+                  Write a keyword to create a new question
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <Label htmlFor="name" className="text-left">
+                  Keyword
+                </Label>
+                <Input
+                  id="name"
+                  placeholder="e.g. 'Keyword'"
+                  className="col-span-3"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm_l"
+                  onClick={(e) => createQuestionFromKeyword(keyword)}
+                >
+                  Save
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={openD} onOpenChange={setOpenD}>
+            <DialogTrigger asChild>
+              <Button variant="cancel" disabled={isEditing}>
+                Document
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader className="gap-2 pt-2">
+                <DialogTitle>Create Question with AI</DialogTitle>
+                <DialogDescription>
+                  Choose a document to create a new question
+                </DialogDescription>
+              </DialogHeader>
+              {/* <div className="grid gap-4 py-4">
+                <Label htmlFor="name" className="text-left">
+                  Keyword
+                </Label>
+                <Input
+                  id="name"
+                  placeholder="e.g. 'Keyword'"
+                  className="col-span-3"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                />
+              </div> */}
+              <DialogFooter>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm_l"
+                  // onClick={(e) => createFlashcard(keyword)}
+                >
+                  Save
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+      <div className="flex flex-col gap-4 justify-between md:grid md:grid-cols-3">
         <div className="text-center text-xl col-start-1 md:col-start-2">
           Question {current} of {count}
         </div>

@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     const completion = document
       ? await getCompletion(
-          `give a short definition for ${message} based on the following document: ${document}`
+          `give a short definition for ${message} based on the following document: ${document}. Note: if ${message} is not present in the document, return "The provided text does not contain a definition"`
         )
       : await getCompletion(`give a short definition for ${message}`);
 
