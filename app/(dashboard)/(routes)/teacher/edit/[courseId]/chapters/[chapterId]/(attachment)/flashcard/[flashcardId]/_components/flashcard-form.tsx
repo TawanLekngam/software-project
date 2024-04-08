@@ -55,6 +55,19 @@ export const FlashcardForm = ({
 
   const router = useRouter()
 
+  const [extractedText, setExtractedText] = useState("")
+
+  const extractText = async (url: string) => {
+    try {
+      const file = await fetch(url).then((res) => res.blob())
+
+      const text = await pdfToText(file)
+      setExtractedText(text)
+    } catch (error) {
+      console.error("Failed to extract text:", error)
+    }
+  }
+
   const toggleEdit = () => setIsEditing((current) => !current)
 
   const createFlashcardFromKeyword = async (keyword: string) => {
@@ -73,24 +86,24 @@ export const FlashcardForm = ({
     }
   }
 
-  const createFlashcardFromDocument = async (index: number) => {
+  const createFlashcardFromDocument = async (
+    keyword: string,
+    index: number
+  ) => {
     setClickedDocument(index)
-    if (documents) {
-      console.log(documents[index].url)
+    extractText(documents![index].url)
+    try {
+      let value = {
+        message: keyword,
+        document: extractedText,
+      }
+      let result = await axios.post(`/api/chat-ai/flashcard`, value)
+      setOpenD(false)
+      setKeyword("")
+      await handleFlashcardAdd(result.data.front, result.data.back)
+    } catch {
+      toast.error("Something went wrong")
     }
-    // try {
-    //   let value = {
-    //     message: keyword,
-    //   }
-    //   let result = await axios.post(`/api/chat-ai/flashcard`, value)
-    //   console.log("back", result.data.back, "front", result.data.front)
-
-    //   setOpenK(false)
-    //   setKeyword("")
-    //   await handleFlashcardAdd(result.data.front, result.data.back)
-    // } catch {
-    //   toast.error("Something went wrong")
-    // }
   }
 
   const handleFlashcardAdd = async (front: any, back: any) => {
@@ -198,7 +211,7 @@ export const FlashcardForm = ({
                   Write a keyword to create a new flash card
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid gap-4 py-4">
+              <div className="grid gap-4 pb-4">
                 <Label htmlFor="name" className="text-left">
                   Keyword
                 </Label>
@@ -235,6 +248,19 @@ export const FlashcardForm = ({
                   Choose a document to create a new flash card
                 </DialogDescription>
               </DialogHeader>
+              <div className="grid gap-4 pb-2">
+                <Label htmlFor="name" className="text-left">
+                  Keyword
+                </Label>
+                <Input
+                  id="name"
+                  placeholder="e.g. 'Keyword'"
+                  className="col-span-3"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                />
+              </div>
+              <hr className="mb-2 border-t-2 rounded-md border-gray-200" />
               {documents?.map((document, i) => (
                 <button
                   key={i}
@@ -243,7 +269,7 @@ export const FlashcardForm = ({
                       ? "bg-[#80489C]/90 text-white"
                       : "bg-slate-200"
                   }`}
-                  onClick={(e) => createFlashcardFromDocument(i)}
+                  onClick={(e) => createFlashcardFromDocument(keyword, i)}
                 >
                   {document.title}
                 </button>
@@ -255,16 +281,6 @@ export const FlashcardForm = ({
                   No document file in this chapter
                 </div>
               )}
-              <DialogFooter>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm_l"
-                  // onClick={(e) => createFlashcard(keyword)}
-                >
-                  Save
-                </Button>
-              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
