@@ -40,6 +40,12 @@ const FlashcardPage = async ({
     },
   });
 
+  const documents = await db.document.findMany({
+    where: {
+      chapterId: params.chapterId,
+    },
+  });
+
   if (!flashcarddeck) {
     return redirect("/");
   }
@@ -80,6 +86,7 @@ const FlashcardPage = async ({
             courseId={params.courseId}
             chapterId={params.chapterId}
             flashcarddeckId={params.flashcardId}
+            documents={documents}
           />
         </div>
         {/* </div> */}
