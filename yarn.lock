@@ -146,6 +146,11 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.1.tgz#16308cea045f0fc777b6ff20a9f25474dd8293d2"
   integrity sha512-9TANp6GPoMtYzQdt54kfAyMmz1+osLlXdg2ENroU7zzrtflTLrrC/lgrIfaSe+Wu0b89GKccT7vxXA0MoAIO+Q==
 
+"@google/generative-ai@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.5.0.tgz#3495e9499a57d698a3ef3a0e590914341ec68099"
+  integrity sha512-uxfN3mROgVxb+9KrlVHIiglcWgNE86pVTS9TRkGS6hMvQoZ5TrB1TIMcW5ZYWxlRhMwtmEdJnNMUxSqM3Qp/Ag==
+
 "@hello-pangea/dnd@^16.3.0":
   version "16.5.0"
   resolved "https://registry.yarnpkg.com/@hello-pangea/dnd/-/dnd-16.5.0.tgz#f323ff9f813204818bc67648a383e8715f47c59c"
