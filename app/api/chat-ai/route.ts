@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCompletion } from "@/lib/completion";
+import { getCompletion } from "@/lib/gemini";
 
 export async function POST(req: Request) {
   try {
