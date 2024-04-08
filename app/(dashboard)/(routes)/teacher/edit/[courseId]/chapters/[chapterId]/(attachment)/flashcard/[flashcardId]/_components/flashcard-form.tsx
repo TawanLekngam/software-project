@@ -267,7 +267,6 @@ export const FlashcardForm = ({
             <>
               {!isEditing && (
                 <>
-                  {/* <div className="flex w-full justify-end"> */}
                   <Button
                     onClick={toggleEdit}
                     variant="underline"
@@ -277,7 +276,6 @@ export const FlashcardForm = ({
                     <Pencil className="h-4 w-4 mr-1" />
                     Edit Card
                   </Button>
-                  {/* </div> */}
                   <div className="w-full max-w-[440px] h-[280px]">
                     <TabsContent
                       value="front"

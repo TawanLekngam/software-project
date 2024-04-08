@@ -1,24 +1,24 @@
-import { auth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
-import { ChapterBox } from "./_components/attachment-box";
-import { CreateAttachment } from "./_components/create-attachment";
-import { ImageForm } from "../../_components/image-form";
-import { TitleForm } from "../../_components/title-form";
-import { DescriptionForm } from "../../_components/description-form";
-import { ChapterNavbar } from "../../_components/chapter-navbar";
-import { CourseActions } from "../../_components/course-actions";
-import { SelectCategory } from "../../_components/select-category";
+import { auth } from "@clerk/nextjs"
+import { redirect } from "next/navigation"
+import { db } from "@/lib/db"
+import { ChapterBox } from "./_components/attachment-box"
+import { CreateAttachment } from "./_components/create-attachment"
+import { ImageForm } from "../../_components/image-form"
+import { TitleForm } from "../../_components/title-form"
+import { DescriptionForm } from "../../_components/description-form"
+import { ChapterNavbar } from "../../_components/chapter-navbar"
+import { CourseActions } from "../../_components/course-actions"
+import { SelectCategory } from "../../_components/select-category"
 
 const chapterIdPage = async ({
   params,
 }: {
-  params: { courseId: string; chapterId: string };
+  params: { courseId: string; chapterId: string }
 }) => {
-  const { userId } = auth();
+  const { userId } = auth()
 
   if (!userId) {
-    return redirect("/");
+    return redirect("/")
   }
 
   const course = await db.course.findUnique({
@@ -68,33 +68,34 @@ const chapterIdPage = async ({
         },
       },
     },
-  });
+  })
 
-  const category = await db.category.findMany();
+  const category = await db.category.findMany()
 
   if (!course) {
-    return redirect("/");
+    return redirect("/")
   }
 
   const initialChapterIndex = course.chapters.findIndex(
     (chapter) => chapter.id === params.chapterId
-  );
+  )
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden">
-      <div className="flex flex-col w-full items-center lg:items-start justify-center p-6 lg:flex-row bg-white">
-        <div className="max-w-xs lg:max-w-md">
+      <div className="flex flex-col w-full items-center lg:items-start justify-center px-6 py-12 gap-6 lg:flex-row bg-white">
+        <div className="w-[270px] h-[200px]">
           <ImageForm initialData={course} courseId={course.id} />
         </div>
-        <div className="flex flex-col gap-5 max-w-[720px] items-center justify-center px-6 pt-6 lg:items-start">
+        <div className="flex flex-col max-w-[720px] items-center justify-center lg:items-start pt-6 lg:pt-0">
           <TitleForm initialData={course} courseId={course.id} />
           <DescriptionForm initialData={course} courseId={course.id} />
-          <SelectCategory
-            courseId={course.id}
-            initialCategory={course.categoryId}
-            category={category}
-          />
-          <div className="flex flex-row w-full justify-end">
+          <div className="flex flex-row w-full justify-between pt-8 items-center">
+            <SelectCategory
+              courseId={course.id}
+              initialCategory={course.categoryId}
+              category={category}
+            />
+
             <CourseActions
               courseId={course.id}
               disabled={false}
@@ -154,6 +155,6 @@ const chapterIdPage = async ({
         </div>
       </div>
     </div>
-  );
-};
-export default chapterIdPage;
+  )
+}
+export default chapterIdPage

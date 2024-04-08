@@ -8,8 +8,11 @@ import { UserButton } from "@clerk/nextjs"
 import { Menu } from "lucide-react"
 import AITeach from "../public/aiteach.svg"
 
+import { cn } from "@/lib/utils"
+
 export const Navbar = () => {
   const [navbar, setNavbar] = useState(false)
+  const [state, setState] = useState("home")
 
   return (
     <nav className="sticky top-0 z-10 w-full bg-white shadow">
@@ -33,27 +36,27 @@ export const Navbar = () => {
         >
           <ul className="justify-center space-y-6 text-center items-center flex flex-col md:flex-row md:space-x-10 md:space-y-0 ">
             <Link href="/">
-              <li className="text-base font-semibold hover:text-[#4F46E5] hover:underline hover:underline-offset-4 hover:decoration-2">
+              <li className={cn("text-base font-semibold hover:text-[#4F46E5] hover:underline hover:underline-offset-4 hover:decoration-2", (state == "home") && "text-[#4F46E5] underline underline-offset-4 decoration-2")} onClick={(e) => setState("home")}>
                 Home
               </li>
             </Link>
             <Link href="/profile">
-              <li className="text-base font-semibold hover:text-[#4F46E5] hover:underline hover:underline-offset-4 hover:decoration-2">
+              <li className={cn("text-base font-semibold hover:text-[#4F46E5] hover:underline hover:underline-offset-4 hover:decoration-2", (state == "profile") && "text-[#4F46E5] underline underline-offset-4 decoration-2")} onClick={(e) => setState("profile")}>
                 Profile
               </li>
             </Link>
             <Link href="/explore">
-              <li className="text-base font-semibold hover:text-[#4F46E5] hover:underline hover:underline-offset-4 hover:decoration-2">
+              <li className={cn("text-base font-semibold hover:text-[#4F46E5] hover:underline hover:underline-offset-4 hover:decoration-2", (state == "explore") && "text-[#4F46E5] underline underline-offset-4 decoration-2")} onClick={(e) => setState("explore")}>
                 Explore
               </li>
             </Link>
             <Link href="/teacher/courses">
-              <li className="text-base font-semibold hover:text-[#4F46E5] hover:underline hover:underline-offset-4 hover:decoration-2">
+              <li className={cn("text-base font-semibold hover:text-[#4F46E5] hover:underline hover:underline-offset-4 hover:decoration-2", (state == "instructor") && "text-[#4F46E5] underline underline-offset-4 decoration-2")} onClick={(e) => setState("instructor")}>
                 Instructor
               </li>
             </Link>
             <Link href="/learning">
-              <li className="text-base font-semibold hover:text-[#4F46E5] hover:underline hover:underline-offset-4 hover:decoration-2">
+              <li className={cn("text-base font-semibold hover:text-[#4F46E5] hover:underline hover:underline-offset-4 hover:decoration-2", (state == "learning") && "text-[#4F46E5] underline underline-offset-4 decoration-2")} onClick={(e) => setState("learning")}>
                 My learning
               </li>
             </Link>

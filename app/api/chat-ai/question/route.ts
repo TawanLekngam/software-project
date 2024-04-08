@@ -10,28 +10,24 @@ export async function POST(req: Request) {
       return new NextResponse("Bad request", { status: 400 });
     }
 
-    const questionCompletion = await getCompletion(
-      `create a question from this message: ${message}`
-    );
-
     const answer1Completion = await getCompletion(
-      `create a correct answer for ${questionCompletion}`
+      `create a correct answer for ${message}`
     );
 
     const answer2Completion = await getCompletion(
-      `create a wrong answer for ${questionCompletion}`
+      `create a wrong answer for ${message}`
     );
 
     const answer3Completion = await getCompletion(
-      `create a  wrong  answer for ${questionCompletion}`
+      `create a  wrong  answer for ${message}`
     );
 
     const answer4Completion = await getCompletion(
-      `create a  wrong answer for ${questionCompletion}`
+      `create a  wrong answer for ${message}`
     );
 
     const question: QuestionDTO = {
-      question: questionCompletion,
+      question: message,
       answers: [
         {
           text: answer1Completion,

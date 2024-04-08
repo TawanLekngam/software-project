@@ -84,28 +84,28 @@ const chapterIdPage = async ({
                     <ChapterBox
                       key={document.id}
                       name={document.title}
-                      link={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}/document/${document.id}`}
+                      link={`/courses/${params.courseId}/chapters/${params.chapterId}/document/${document.id}`}
                     />
                   ))}
                   {chapter.flashcarddecks.map((flashcard) => (
                     <ChapterBox
                       key={flashcard.id}
                       name={flashcard.title}
-                      link={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}/flashcard/${flashcard.id}`}
+                      link={`/courses/${params.courseId}/chapters/${params.chapterId}/flashcard/${flashcard.id}`}
                     />
                   ))}
                   {chapter.questionSet.map((question) => (
                     <ChapterBox
                       key={question.id}
                       name={question.title}
-                      link={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}/quiz/${question.id}`}
+                      link={`/courses/${params.courseId}/chapters/${params.chapterId}/quiz/${question.id}`}
                     />
                   ))}
                   {chapter.videos.map((video) => (
                     <ChapterBox
                       key={video.id}
                       name={video.title!}
-                      link={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}/video/${video.id}`}
+                      link={`/courses/${params.courseId}/chapters/${params.chapterId}/video/${video.id}`}
                     />
                   ))}
                 </div>

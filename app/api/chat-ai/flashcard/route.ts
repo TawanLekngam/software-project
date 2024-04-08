@@ -10,15 +10,12 @@ export async function POST(req: Request) {
       return new NextResponse("Bad Request", { status: 400 });
     }
 
-    const frontCompletion = await getCompletion(
-      `create a flashcard with the front side (keyword): ${message}`
-    );
     const backCompletion = await getCompletion(
-      `create a flashcard with the back side (definition): ${message}`
+      `create a definition for this word: ${message}`
     );
 
     const flashcard: FlashcardDTO = {
-      front: frontCompletion,
+      front: message,
       back: backCompletion,
     };
 
