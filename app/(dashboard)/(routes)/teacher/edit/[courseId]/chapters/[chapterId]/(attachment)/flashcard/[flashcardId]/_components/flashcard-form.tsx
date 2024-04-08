@@ -5,7 +5,7 @@ import { PlusCircle, Pencil } from "lucide-react"
 import { useState } from "react"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
-import { Flashcard } from "@prisma/client"
+import { Flashcard, Document } from "@prisma/client"
 
 import {
   Dialog,
@@ -24,11 +24,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
+import pdfToText from "react-pdftotext"
+
 interface FlashcardFormProps {
   initialData: Flashcard[]
   courseId: string
   chapterId: string
   flashcarddeckId: string
+  documents: Document[] | null
 }
 
 export const FlashcardForm = ({
@@ -36,6 +39,7 @@ export const FlashcardForm = ({
   courseId,
   chapterId,
   flashcarddeckId,
+  documents,
 }: FlashcardFormProps) => {
   const [cards, setCards] = useState(initialData)
   const [clickedCard, setClickedCard] = useState(0)
@@ -46,6 +50,8 @@ export const FlashcardForm = ({
   const [keyword, setKeyword] = useState("")
   const [openK, setOpenK] = useState(false)
   const [openD, setOpenD] = useState(false)
+
+  const [clickedDocument, setClickedDocument] = useState(999)
 
   const router = useRouter()
 
@@ -65,6 +71,26 @@ export const FlashcardForm = ({
     } catch {
       toast.error("Something went wrong")
     }
+  }
+
+  const createFlashcardFromDocument = async (index: number) => {
+    setClickedDocument(index)
+    if (documents) {
+      console.log(documents[index].url)
+    }
+    // try {
+    //   let value = {
+    //     message: keyword,
+    //   }
+    //   let result = await axios.post(`/api/chat-ai/flashcard`, value)
+    //   console.log("back", result.data.back, "front", result.data.front)
+
+    //   setOpenK(false)
+    //   setKeyword("")
+    //   await handleFlashcardAdd(result.data.front, result.data.back)
+    // } catch {
+    //   toast.error("Something went wrong")
+    // }
   }
 
   const handleFlashcardAdd = async (front: any, back: any) => {
@@ -209,18 +235,26 @@ export const FlashcardForm = ({
                   Choose a document to create a new flash card
                 </DialogDescription>
               </DialogHeader>
-              {/* <div className="grid gap-4 py-4">
-                <Label htmlFor="name" className="text-left">
-                  Keyword
-                </Label>
-                <Input
-                  id="name"
-                  placeholder="e.g. 'Keyword'"
-                  className="col-span-3"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                />
-              </div> */}
+              {documents?.map((document, i) => (
+                <button
+                  key={i}
+                  className={`font-medium p-4 h-[56px] rounded-md ${
+                    clickedDocument === i
+                      ? "bg-[#80489C]/90 text-white"
+                      : "bg-slate-200"
+                  }`}
+                  onClick={(e) => createFlashcardFromDocument(i)}
+                >
+                  {document.title}
+                </button>
+              ))}
+              {documents!.length > 0 ? (
+                ""
+              ) : (
+                <div className="text-md text-center text-slate-500 italic">
+                  No document file in this chapter
+                </div>
+              )}
               <DialogFooter>
                 <Button
                   type="submit"
