@@ -76,38 +76,40 @@ const chapterIdPage = async ({
             initialChapterIndex={initialChapterIndex}
           />
           <div className="max-w-[720px] mx-auto justify-center">
-            {course.chapters.map((chapter) => (
-              <div key={chapter.id}>
-                {chapter.documents.map((document) => (
-                  <ChapterBox
-                    key={document.id}
-                    name={document.title}
-                    link={`/courses/${params.courseId}/chapters/${params.chapterId}/document/${document.id}`}
-                  />
-                ))}
-                {chapter.flashcarddecks.map((flashcard) => (
-                  <ChapterBox
-                    key={flashcard.id}
-                    name={flashcard.title}
-                    link={`/courses/${params.courseId}/chapters/${params.chapterId}/flashcard/${flashcard.id}`}
-                  />
-                ))}
-                {chapter.questionSet.map((question) => (
-                  <ChapterBox
-                    key={question.id}
-                    name={question.title}
-                    link={`/courses/${params.courseId}/chapters/${params.chapterId}/quiz/${question.id}`}
-                  />
-                ))}
-                {chapter.videos.map((video) => (
-                  <ChapterBox
-                    key={video.id}
-                    name={video.title!}
-                    link={`/courses/${params.courseId}/chapters/${params.chapterId}/video/${video.id}`}
-                  />
-                ))}
-              </div>
-            ))}
+            {course.chapters
+              .filter((chapter) => chapter.id === params.chapterId)
+              .map((chapter) => (
+                <div key={chapter.id}>
+                  {chapter.documents.map((document) => (
+                    <ChapterBox
+                      key={document.id}
+                      name={document.title}
+                      link={`/courses/${params.courseId}/chapters/${params.chapterId}/document/${document.id}`}
+                    />
+                  ))}
+                  {chapter.flashcarddecks.map((flashcard) => (
+                    <ChapterBox
+                      key={flashcard.id}
+                      name={flashcard.title}
+                      link={`/courses/${params.courseId}/chapters/${params.chapterId}/flashcard/${flashcard.id}`}
+                    />
+                  ))}
+                  {chapter.questionSet.map((question) => (
+                    <ChapterBox
+                      key={question.id}
+                      name={question.title}
+                      link={`/courses/${params.courseId}/chapters/${params.chapterId}/quiz/${question.id}`}
+                    />
+                  ))}
+                  {chapter.videos.map((video) => (
+                    <ChapterBox
+                      key={video.id}
+                      name={video.title!}
+                      link={`/courses/${params.courseId}/chapters/${params.chapterId}/video/${video.id}`}
+                    />
+                  ))}
+                </div>
+              ))}
           </div>
         </div>
       </div>

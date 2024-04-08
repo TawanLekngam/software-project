@@ -69,7 +69,9 @@ export const CourseActions = ({
         {isPublished ? "Unpublish" : "Publish"}
       </Button>
       <ConfirmModal onConfirm={onDelete}>
-        <Trash className="h-4 w-4" />
+      <Button size="sm" disabled={isLoading}>
+          <Trash className="h-4 w-4" />
+        </Button>
       </ConfirmModal>
     </div>
   );

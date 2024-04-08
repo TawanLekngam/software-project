@@ -45,7 +45,7 @@ const CoursePage = async ({
   }
   if (course.chapters.length === 0) {
     return (
-      <>
+      <>      
         <CourseHero course={course} userId={userId} enroll={enroll?.userId!} />
         <ChapterNavbar
           initialChapterIndex={initialChapterIndex}

@@ -1,29 +1,29 @@
-import { auth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
-import { CheckCircle, Clock } from "lucide-react";
+import { auth } from "@clerk/nextjs"
+import { redirect } from "next/navigation"
+import { CheckCircle, Clock } from "lucide-react"
 
-import Image from "next/image";
-import HeroPic from "./_components/hero.svg";
-import Levelup from "./_components/levelup.svg";
-import Feedback from "./_components/feedback.svg";
-import Quiz from "./_components/quiz.svg";
+import Image from "next/image"
+import HeroPic from "./_components/hero.svg"
+import Levelup from "./_components/levelup.svg"
+import Feedback from "./_components/feedback.svg"
+import Quiz from "./_components/quiz.svg"
 
-import { Slider } from "@/components/slider";
+import { Slider } from "@/components/slider"
 
-import { db } from "@/lib/db";
-import { getRecommendCourses } from "@/actions/get-recomment-course";
-import { ChapterBox } from "@/app/courses/[courseId]/chapters/[chapterId]/_components/chapter-box";
+import { db } from "@/lib/db"
+import { getRecommendCourses } from "@/actions/get-recommended-course"
+import { ChapterBox } from "@/app/courses/[courseId]/chapters/[chapterId]/_components/chapter-box"
 
 export default async function Dashboard() {
-  const { userId } = auth();
+  const { userId } = auth()
 
   if (!userId) {
-    return redirect("/");
+    return redirect("/")
   }
 
   const courses = await getRecommendCourses({
     userId,
-  });
+  })
 
   return (
     <>
@@ -35,11 +35,6 @@ export default async function Dashboard() {
           <h2 className="text-2xl font-medium">
             Explore course and level up your skill
           </h2>
-          {/* <Link href="/register"> */}
-          {/* <div className="rounded-md border-primary border-2 px-11 py-2 text-base font-bold text-primary shadow-sm">
-            Join Us
-          </div> */}
-          {/* </Link> */}
         </div>
         <div className="max-w-xs xl:max-w-md">
           <Image src={HeroPic} alt={"Hero Pic"} />
@@ -50,9 +45,7 @@ export default async function Dashboard() {
         <h1 className="text-[32px] text-[#4F46E5] font-extrabold text-center">
           Recommended Course
         </h1>
-        {/* <div className="w-full"> */}
         <Slider items={courses} />
-        {/* </div> */}
       </section>
 
       <section className="flex flex-col items-center justify-center bg-[#F3F4F4] px-24 py-20 gap-12">
@@ -88,7 +81,7 @@ export default async function Dashboard() {
           </div>
           <div className="grid grid-col items-center gap-y-4 lg:gap-y-8 lg:col-span-2 xl:mt-12 ">
             <h2 className="text-2xl text-center text-[#4B4B4B] font-semibold">
-              Review with quiz
+              Review with <br /> quiz and flashcard
             </h2>
             <Image
               className="w-[160px] md:w-[200px] justify-self-center"
@@ -99,5 +92,5 @@ export default async function Dashboard() {
         </div>
       </section>
     </>
-  );
+  )
 }
