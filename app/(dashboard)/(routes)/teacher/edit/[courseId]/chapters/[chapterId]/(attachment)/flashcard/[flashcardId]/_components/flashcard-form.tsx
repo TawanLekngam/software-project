@@ -5,7 +5,7 @@ import { PlusCircle, Pencil } from "lucide-react"
 import { useState } from "react"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
-import { Flashcard } from "@prisma/client"
+import { Flashcard, Document } from "@prisma/client"
 
 import {
   Dialog,
@@ -24,11 +24,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
+import pdfToText from "react-pdftotext"
+
 interface FlashcardFormProps {
   initialData: Flashcard[]
   courseId: string
   chapterId: string
   flashcarddeckId: string
+  documents: Document[] | null
 }
 
 export const FlashcardForm = ({
@@ -36,6 +39,7 @@ export const FlashcardForm = ({
   courseId,
   chapterId,
   flashcarddeckId,
+  documents,
 }: FlashcardFormProps) => {
   const [cards, setCards] = useState(initialData)
   const [clickedCard, setClickedCard] = useState(0)
@@ -44,13 +48,29 @@ export const FlashcardForm = ({
   const [isEditing, setIsEditing] = useState(false)
 
   const [keyword, setKeyword] = useState("")
-  const [open, setOpen] = useState(false)
+  const [openK, setOpenK] = useState(false)
+  const [openD, setOpenD] = useState(false)
+
+  const [clickedDocument, setClickedDocument] = useState(999)
 
   const router = useRouter()
 
+  const [extractedText, setExtractedText] = useState("")
+
+  const extractText = async (url: string) => {
+    try {
+      const file = await fetch(url).then((res) => res.blob())
+
+      const text = await pdfToText(file)
+      setExtractedText(text)
+    } catch (error) {
+      console.error("Failed to extract text:", error)
+    }
+  }
+
   const toggleEdit = () => setIsEditing((current) => !current)
 
-  const createFlashcard = async (keyword: string) => {
+  const createFlashcardFromKeyword = async (keyword: string) => {
     try {
       let value = {
         message: keyword,
@@ -58,7 +78,27 @@ export const FlashcardForm = ({
       let result = await axios.post(`/api/chat-ai/flashcard`, value)
       console.log("back", result.data.back, "front", result.data.front)
 
-      setOpen(false)
+      setOpenK(false)
+      setKeyword("")
+      await handleFlashcardAdd(result.data.front, result.data.back)
+    } catch {
+      toast.error("Something went wrong")
+    }
+  }
+
+  const createFlashcardFromDocument = async (
+    keyword: string,
+    index: number
+  ) => {
+    setClickedDocument(index)
+    extractText(documents![index].url)
+    try {
+      let value = {
+        message: keyword,
+        document: extractedText,
+      }
+      let result = await axios.post(`/api/chat-ai/flashcard`, value)
+      setOpenD(false)
       setKeyword("")
       await handleFlashcardAdd(result.data.front, result.data.back)
     } catch {
@@ -156,43 +196,94 @@ export const FlashcardForm = ({
     <div className="flex flex-col-reverse items-center lg:items-start gap-8 lg:flex-row">
       <div className="flex flex-col gap-4 w-full max-w-sm lg:max-w-xs">
         <hr className="lg:hidden mb-2 border-t-2 rounded-md border-gray-200" />
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button variant="primary" disabled={isEditing}>
-              Create with Keyword by AI
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader className="gap-2 pt-2">
-              <DialogTitle>Create new flash card by AI</DialogTitle>
-              <DialogDescription>
-                Write a keyword to create a new flash card
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <Label htmlFor="name" className="text-left">
+        <h3 className="text-lg font-medium">Create Flashcard with AI from:</h3>
+        <div className="flex flex-row gap-4">
+          <Dialog open={openK} onOpenChange={setOpenK}>
+            <DialogTrigger asChild>
+              <Button variant="cancel" disabled={isEditing}>
                 Keyword
-              </Label>
-              <Input
-                id="name"
-                placeholder="e.g. 'Keyword'"
-                className="col-span-3"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                type="submit"
-                variant="primary"
-                size="sm_l"
-                onClick={(e) => createFlashcard(keyword)}
-              >
-                Save
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader className="gap-2 pt-2">
+                <DialogTitle>Create Flashcard with AI</DialogTitle>
+                <DialogDescription>
+                  Write a keyword to create a new flash card
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 pb-4">
+                <Label htmlFor="name" className="text-left">
+                  Keyword
+                </Label>
+                <Input
+                  id="name"
+                  placeholder="e.g. 'Keyword'"
+                  className="col-span-3"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm_l"
+                  onClick={(e) => createFlashcardFromKeyword(keyword)}
+                >
+                  Save
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={openD} onOpenChange={setOpenD}>
+            <DialogTrigger asChild>
+              <Button variant="cancel" disabled={isEditing}>
+                Document
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader className="gap-2 pt-2">
+                <DialogTitle>Create Flashcard with AI</DialogTitle>
+                <DialogDescription>
+                  Choose a document to create a new flash card
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 pb-2">
+                <Label htmlFor="name" className="text-left">
+                  Keyword
+                </Label>
+                <Input
+                  id="name"
+                  placeholder="e.g. 'Keyword'"
+                  className="col-span-3"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                />
+              </div>
+              <hr className="mb-2 border-t-2 rounded-md border-gray-200" />
+              {documents?.map((document, i) => (
+                <button
+                  key={i}
+                  className={`font-medium p-4 h-[56px] rounded-md ${
+                    clickedDocument === i
+                      ? "bg-[#80489C]/90 text-white"
+                      : "bg-slate-200"
+                  }`}
+                  onClick={(e) => createFlashcardFromDocument(keyword, i)}
+                >
+                  {document.title}
+                </button>
+              ))}
+              {documents!.length > 0 ? (
+                ""
+              ) : (
+                <div className="text-md text-center text-slate-500 italic">
+                  No document file in this chapter
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+        </div>
         <div className="flex flex-row justify-between">
           <h3 className="text-lg font-medium">Card list</h3>
           <Button

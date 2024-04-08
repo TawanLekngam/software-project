@@ -41,6 +41,9 @@ export const CreateAttachment = ({ courseId, chapterId }: AttachmentProps) => {
       let endpointType = type;
       if (type === "questionset") {
         endpointType = "quiz";
+      }
+      else if (type === "flashcarddecks") {
+        endpointType = "flashcard"
       } else {
         endpointType = type.slice(0, -1);
       }
