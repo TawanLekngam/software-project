@@ -1,16 +1,16 @@
-import { db } from "@/lib/db";
-import { auth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
-import ChapterNavbar from "../../_components/chapter-navbar";
-import CourseHero from "../../_components/course-hero";
-import { ChapterBox } from "./_components/chapter-box";
+import { db } from "@/lib/db"
+import { auth } from "@clerk/nextjs"
+import { redirect } from "next/navigation"
+import ChapterNavbar from "../../_components/chapter-navbar"
+import CourseHero from "../../_components/course-hero"
+import { ChapterBox } from "./_components/chapter-box"
 
 const chapterIdPage = async ({
   params,
 }: {
-  params: { courseId: string; chapterId: string };
+  params: { courseId: string; chapterId: string }
 }) => {
-  const { userId } = auth();
+  const { userId } = auth()
 
   const course = await db.course.findUnique({
     where: {
@@ -26,20 +26,32 @@ const chapterIdPage = async ({
             orderBy: {
               createdAt: "asc",
             },
+            where: {
+              isPublished: true,
+            },
           },
           flashcarddecks: {
             orderBy: {
               createdAt: "asc",
+            },
+            where: {
+              isPublic: true,
             },
           },
           questionSet: {
             orderBy: {
               createdAt: "asc",
             },
+            where: {
+              isPublished: true,
+            },
           },
           videos: {
             orderBy: {
               createdAt: "asc",
+            },
+            where: {
+              isPublished: true,
             },
           },
         },
@@ -48,7 +60,7 @@ const chapterIdPage = async ({
         },
       },
     },
-  });
+  })
 
   const enroll = await db.enrollment.findUnique({
     where: {
@@ -57,14 +69,14 @@ const chapterIdPage = async ({
         courseId: params.courseId,
       },
     },
-  });
+  })
 
   const initialChapterIndex = course!.chapters.findIndex(
     (ch) => ch.id === params.chapterId
-  );
+  )
 
   if (!course) {
-    return redirect("/");
+    return redirect("/")
   }
   return (
     <>
@@ -114,6 +126,6 @@ const chapterIdPage = async ({
         </div>
       </div>
     </>
-  );
-};
-export default chapterIdPage;
+  )
+}
+export default chapterIdPage

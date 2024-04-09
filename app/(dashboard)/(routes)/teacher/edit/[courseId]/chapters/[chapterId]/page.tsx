@@ -1,28 +1,28 @@
-import { auth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
-import { ChapterBox } from "./_components/attachment-box";
-import { CreateAttachment } from "./_components/create-attachment";
-import { ImageForm } from "../../_components/image-form";
-import { TitleForm } from "../../_components/title-form";
-import { DescriptionForm } from "../../_components/description-form";
-import { ChapterNavbar } from "../../_components/chapter-navbar";
-import { CourseActions } from "../../_components/course-actions";
-import { SelectCategory } from "../../_components/select-category";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { auth } from "@clerk/nextjs"
+import { redirect } from "next/navigation"
+import { db } from "@/lib/db"
+import { ChapterBox } from "./_components/attachment-box"
+import { CreateAttachment } from "./_components/create-attachment"
+import { ImageForm } from "../../_components/image-form"
+import { TitleForm } from "../../_components/title-form"
+import { DescriptionForm } from "../../_components/description-form"
+import { ChapterNavbar } from "../../_components/chapter-navbar"
+import { CourseActions } from "../../_components/course-actions"
+import { SelectCategory } from "../../_components/select-category"
+import { Button } from "@/components/ui/button"
+import { ChevronLeft } from "lucide-react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 const chapterIdPage = async ({
   params,
 }: {
-  params: { courseId: string; chapterId: string };
+  params: { courseId: string; chapterId: string }
 }) => {
-  const { userId } = auth();
+  const { userId } = auth()
 
   if (!userId) {
-    return redirect("/");
+    return redirect("/")
   }
 
   const course = await db.course.findUnique({
@@ -72,17 +72,17 @@ const chapterIdPage = async ({
         },
       },
     },
-  });
+  })
 
-  const category = await db.category.findMany();
+  const category = await db.category.findMany()
 
   if (!course) {
-    return redirect("/");
+    return redirect("/")
   }
 
   const initialChapterIndex = course.chapters.findIndex(
     (chapter) => chapter.id === params.chapterId
-  );
+  )
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden">
@@ -133,11 +133,11 @@ const chapterIdPage = async ({
                     link={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}/document/${document.id}`}
                   />
                 ))}
-                {chapter.flashcarddecks.map((flashcard) => (
+                {chapter.videos.map((video) => (
                   <ChapterBox
-                    key={flashcard.id}
-                    name={flashcard.title}
-                    link={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}/flashcard/${flashcard.id}`}
+                    key={video.id}
+                    name={video.title!}
+                    link={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}/video/${video.id}`}
                   />
                 ))}
                 {chapter.questionSet.map((question) => (
@@ -147,11 +147,11 @@ const chapterIdPage = async ({
                     link={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}/quiz/${question.id}`}
                   />
                 ))}
-                {chapter.videos.map((video) => (
+                {chapter.flashcarddecks.map((flashcard) => (
                   <ChapterBox
-                    key={video.id}
-                    name={video.title!}
-                    link={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}/video/${video.id}`}
+                    key={flashcard.id}
+                    name={flashcard.title}
+                    link={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}/flashcard/${flashcard.id}`}
                   />
                 ))}
               </div>
@@ -165,6 +165,6 @@ const chapterIdPage = async ({
         </div>
       </div>
     </div>
-  );
-};
-export default chapterIdPage;
+  )
+}
+export default chapterIdPage
