@@ -140,15 +140,17 @@ export const QuizForm = ({
 
   const createQuestionFromKeyword = async (keyword: string) => {
     try {
+      toast.loading("Loading...")
       let value = {
         message: keyword,
       }
       let result = await axios.post(`/api/chat-ai/question`, value)
-
+      toast.dismiss()
       setOpenK(false)
       setKeyword("")
       await handleQuestionAdd(result.data.question, result.data.answers)
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
   }
@@ -156,16 +158,19 @@ export const QuizForm = ({
   const createQuestionFromDocument = async (keyword: string, index: number) => {
     await extractText(documents![index].url)
     try {
+      toast.loading("Loading...")
       let value = {
         message: keyword,
         document: extractedText,
       }
       let result = await axios.post(`/api/chat-ai/question`, value)
+      toast.dismiss()
       setOpenDK(false)
       setKeyword("")
       setClickedDocument(999)
       await handleQuestionAdd(result.data.question, result.data.answers)
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
   }
@@ -173,26 +178,29 @@ export const QuizForm = ({
   const createQuestionSetFromDocument = async (num: string, index: number) => {
     await extractText(documents![index].url)
     try {
+      toast.loading("Loading...")
       let value = {
         document: extractedText,
         number: num,
       }
 
       let result = await axios.post(`/api/chat-ai/questionset`, value)
+      toast.dismiss()
       setOpenD(false)
       console.log(result.data)
-      // for (let i = 0; i < result.data.length; i++) {
-      //   await handleFlashcardAdd(result.data[i].front, result.data[i].back)
-      // }
-      // router.refresh()
+      for (let i = 0; i < result.data.length; i++) {
+        await handleQuestionAdd(result.data[i].question, result.data[i].answers)
+      }
+      router.refresh()
       setClickedDocument(999)
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
   }
 
   const handleQuestionAdd = async (question: any, answerSet: any) => {
-    let newQuestion
+    let newQuestion: any
     let result
     let valueQ = {
       question: question,
@@ -221,9 +229,9 @@ export const QuizForm = ({
       toast.dismiss()
       toast.success("Question created")
 
-      setQuestions([newQuestion, ...questions])
-      setData([newQuestion, ...questions])
-      setCount(count + 1)
+      setQuestions((prevItems) => ([newQuestion, ...prevItems]))
+      setData((prevItems) => ([newQuestion, ...prevItems]))
+      setCount((prevItems) => (prevItems+1))
       answerSet
         ? (setAnswers(["0", ...answers]),
           setSelectedValue("0"),

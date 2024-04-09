@@ -2,7 +2,7 @@
 
 import axios from "axios"
 import { PlusCircle, Pencil } from "lucide-react"
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
 import { Flashcard, Document } from "@prisma/client"
@@ -75,16 +75,18 @@ export const FlashcardForm = ({
 
   const createFlashcardFromKeyword = async (keyword: string) => {
     try {
+      toast.loading("Loading...")
       let value = {
         message: keyword,
       }
       let result = await axios.post(`/api/chat-ai/flashcard`, value)
       console.log("back", result.data.back, "front", result.data.front)
-
+      toast.dismiss()
       setOpenK(false)
       setKeyword("")
       await handleFlashcardAdd(result.data.front, result.data.back)
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
   }
@@ -93,46 +95,52 @@ export const FlashcardForm = ({
     keyword: string,
     index: number
   ) => {
-    await extractText(documents![index].url)
     try {
+      toast.loading("Loading...")
       let value = {
         message: keyword,
         document: extractedText,
       }
+
       let result = await axios.post(`/api/chat-ai/flashcard`, value)
+      toast.dismiss()
       setOpenDK(false)
       setKeyword("")
       await handleFlashcardAdd(result.data.front, result.data.back)
+      setExtractedText("")
       setClickedDocument(999)
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
   }
 
   const createFlashcardSetFromDocument = async (num: string, index: number) => {
-    
-    await extractText(documents![index].url)
     try {
+      toast.loading("Loading...")
       let value = {
         document: extractedText,
         number: num,
       }
 
       let result = await axios.post(`/api/chat-ai/flashcardset`, value)
+      toast.dismiss()
       setOpenD(false)
-      console.log(result.data)
-      // for (let i = 0; i < result.data.length; i++) {
-      //   await handleFlashcardAdd(result.data[i].front, result.data[i].back)
-      // }
-      // router.refresh()
+
+      for (let i = 0; i < result.data.length; i++) {
+        await handleFlashcardAdd(result.data[i].front, result.data[i].back)
+      }
+      setExtractedText("")
       setClickedDocument(999)
+      router.refresh()
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
   }
 
   const handleFlashcardAdd = async (front: any, back: any) => {
-    let newCard
+    let newCard: any
     let value = {
       front: front,
       back: back,
@@ -146,15 +154,18 @@ export const FlashcardForm = ({
       toast.dismiss()
       toast.success("Flashcard created")
       newCard = await result.data
+      console.log(cards.length)
+      setCards((prevItems) => (
+        [newCard, ...prevItems]
+      ))
+      setClickedCard(0)
+      setFront(newCard.front)
+      setBack(newCard.back)
       router.refresh()
     } catch {
       toast.dismiss()
       toast.error("Something went wrong")
     }
-    setCards([newCard, ...cards])
-    setClickedCard(0)
-    setFront(newCard.front)
-    setBack(newCard.back)
   }
 
   const handleFlashcardCancel = () => {
@@ -219,6 +230,10 @@ export const FlashcardForm = ({
       : (setFront(cards[clickedCard + 1].front!),
         setBack(cards[clickedCard + 1].back!))
   }
+
+  React.useEffect(() => {
+    console.log("Cards check:", cards.length)
+  }, [cards])
 
   return (
     <div className="flex flex-col-reverse items-center lg:items-start gap-8 lg:flex-row">
@@ -300,7 +315,9 @@ export const FlashcardForm = ({
                       ? "bg-[#80489C]/90 text-white"
                       : "bg-slate-200"
                   }`}
-                  onClick={(e) => setClickedDocument(i)}
+                  onClick={(e) => (
+                    setClickedDocument(i), extractText(documents[i].url)
+                  )}
                 >
                   {document.title}
                 </button>
@@ -312,22 +329,24 @@ export const FlashcardForm = ({
                   No document file in this chapter
                 </div>
               )}
-               <DialogFooter>
-                  <Button
-                    disabled={
-                      keyword != "" && clickedDocument != 999 ? false : true
-                    }
-                    type="submit"
-                    variant="primary"
-                    size="sm_l"
-                    onClick={(e) =>
-                      createFlashcardFromDocument(keyword, clickedDocument)
-                    }
-                    className="mt-2"
-                  >
-                    Save
-                  </Button>
-                </DialogFooter>
+              <DialogFooter>
+                <Button
+                  disabled={
+                    keyword != "" && clickedDocument != 999
+                      ? false
+                      : true && extractedText != ""
+                  }
+                  type="submit"
+                  variant="primary"
+                  size="sm_l"
+                  onClick={(e) =>
+                    createFlashcardFromDocument(keyword, clickedDocument)
+                  }
+                  className="mt-2"
+                >
+                  Save
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
@@ -383,7 +402,9 @@ export const FlashcardForm = ({
                     ? "bg-[#80489C]/90 text-white"
                     : "bg-slate-200"
                 }`}
-                onClick={(e) => setClickedDocument(i)}
+                onClick={(e) => (
+                  setClickedDocument(i), extractText(documents[i].url)
+                )}
               >
                 {document.title}
               </button>
@@ -396,25 +417,26 @@ export const FlashcardForm = ({
               </div>
             )}
             <DialogFooter>
-                <Button
-                  disabled={
-                    Number(num_input) < 11 &&
-                    0 < Number(num_input) &&
-                    clickedDocument != 999
-                      ? false
-                      : true
-                  }
-                  type="submit"
-                  variant="primary"
-                  size="sm_l"
-                  onClick={(e) =>
-                    createFlashcardSetFromDocument(num_input, clickedDocument)
-                  }
-                  className="mt-2"
-                >
-                  Save
-                </Button>
-              </DialogFooter>
+              <Button
+                disabled={
+                  Number(num_input) < 11 &&
+                  0 < Number(num_input) &&
+                  clickedDocument != 999 &&
+                  extractedText != ""
+                    ? false
+                    : true
+                }
+                type="submit"
+                variant="primary"
+                size="sm_l"
+                onClick={(e) =>
+                  createFlashcardSetFromDocument(num_input, clickedDocument)
+                }
+                className="mt-2"
+              >
+                Save
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
         <div className="flex flex-row justify-between">
