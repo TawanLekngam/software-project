@@ -80,7 +80,7 @@ export const QuizForm = ({
   const router = useRouter()
 
   const [extractedText, setExtractedText] = useState("")
-  const [num_input, setNumInput] = useState("5")
+  const [num_input, setNumInput] = useState("3")
 
   const extractText = async (url: string) => {
     try {
@@ -154,7 +154,6 @@ export const QuizForm = ({
   }
 
   const createQuestionFromDocument = async (keyword: string, index: number) => {
-    setClickedDocument(index)
     await extractText(documents![index].url)
     try {
       let value = {
@@ -164,6 +163,7 @@ export const QuizForm = ({
       let result = await axios.post(`/api/chat-ai/question`, value)
       setOpenDK(false)
       setKeyword("")
+      setClickedDocument(999)
       await handleQuestionAdd(result.data.question, result.data.answers)
     } catch {
       toast.error("Something went wrong")
@@ -171,7 +171,6 @@ export const QuizForm = ({
   }
 
   const createQuestionSetFromDocument = async (num: string, index: number) => {
-    setClickedDocument(index)
     await extractText(documents![index].url)
     try {
       let value = {
@@ -186,6 +185,7 @@ export const QuizForm = ({
       //   await handleFlashcardAdd(result.data[i].front, result.data[i].back)
       // }
       // router.refresh()
+      setClickedDocument(999)
     } catch {
       toast.error("Something went wrong")
     }
@@ -350,7 +350,7 @@ export const QuizForm = ({
                   Keyword
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="max-w-[425px] rounded-md">
                 <DialogHeader className="gap-2 pt-2">
                   <DialogTitle>Create Question with AI</DialogTitle>
                   <DialogDescription>
@@ -416,7 +416,7 @@ export const QuizForm = ({
                         ? "bg-[#80489C]/90 text-white"
                         : "bg-slate-200"
                     }`}
-                    onClick={(e) => createQuestionFromDocument(keyword, i)}
+                    onClick={(e) => setClickedDocument(i)}
                   >
                     {document.title}
                   </button>
@@ -428,6 +428,22 @@ export const QuizForm = ({
                     No document file in this chapter
                   </div>
                 )}
+                <DialogFooter>
+                  <Button
+                    disabled={
+                      keyword != "" && clickedDocument != 999 ? false : true
+                    }
+                    type="submit"
+                    variant="primary"
+                    size="sm_l"
+                    onClick={(e) =>
+                      createQuestionFromDocument(keyword, clickedDocument)
+                    }
+                    className="mt-2"
+                  >
+                    Save
+                  </Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
@@ -458,7 +474,7 @@ export const QuizForm = ({
                   id="num_input"
                   name="num_input"
                   min="1"
-                  max="10"
+                  max="5"
                   defaultValue={num_input}
                   value={num_input}
                   className="pl-2"
@@ -468,7 +484,7 @@ export const QuizForm = ({
                 />{" "}
                 <p
                   className={`text-sm text-red-400 ${
-                    Number(num_input) < 11 && 0 < Number(num_input)
+                    Number(num_input) < 6 && 0 < Number(num_input)
                       ? "hidden"
                       : ""
                   } `}
@@ -485,7 +501,7 @@ export const QuizForm = ({
                       ? "bg-[#80489C]/90 text-white"
                       : "bg-slate-200"
                   }`}
-                  onClick={(e) => createQuestionSetFromDocument(num_input, i)}
+                  onClick={(e) => setClickedDocument(i)}
                 >
                   {document.title}
                 </button>
@@ -497,6 +513,26 @@ export const QuizForm = ({
                   No document file in this chapter
                 </div>
               )}
+              <DialogFooter>
+                <Button
+                  disabled={
+                    Number(num_input) < 6 &&
+                    0 < Number(num_input) &&
+                    clickedDocument != 999
+                      ? false
+                      : true
+                  }
+                  type="submit"
+                  variant="primary"
+                  size="sm_l"
+                  onClick={(e) =>
+                    createQuestionSetFromDocument(num_input, clickedDocument)
+                  }
+                  className="mt-2"
+                >
+                  Save
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
