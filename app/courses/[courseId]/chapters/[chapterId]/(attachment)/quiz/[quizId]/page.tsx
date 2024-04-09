@@ -32,6 +32,7 @@ const quizPage = async ({ params }: { params: { quizId: string } }) => {
       <div className="flex-grow">
         <div className="container mx-auto justify-center max-w-[900px]">
           <div className="flex flex-col items-center justify-center px-24 py-12 gap-12">
+            <div className="self-start">back</div>
             <h1 className="text-[32px] font-extrabold text-center text-black">
               Quiz
             </h1>

@@ -2,10 +2,12 @@ import { auth } from "@clerk/nextjs";
 import { DocumentForm } from "./_components/document-form";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { PencilRuler } from "lucide-react";
+import { ChevronLeft, PencilRuler } from "lucide-react";
 import { Actions } from "./_components/actions";
 import { Banner } from "@/components/banner";
 import { DocumentTitleForm } from "./_components/document-title-form";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const Document = async ({
   params,
@@ -38,11 +40,18 @@ const Document = async ({
       )}
       <div className="flex flex-col items-center justify-center w-full px-4 py-16 gap-8 ">
         <div className="flex items-center w-4/5 max-w-7xl justify-between">
+          <Link
+            href={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}`}
+          >
+            <Button variant={"outline"}>
+              <ChevronLeft />
+              back
+            </Button>
+          </Link>
           <div className="flex flex-row gap-2 items-center justify-center">
             <PencilRuler />
             <h1 className="text-2xl font-medium">PDF Files</h1>
           </div>
-
           <Actions
             disabled={!isComplete}
             courseId={params.courseId}
