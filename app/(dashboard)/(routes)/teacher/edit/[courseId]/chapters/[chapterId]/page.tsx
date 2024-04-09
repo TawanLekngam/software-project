@@ -88,7 +88,7 @@ const chapterIdPage = async ({
     <div className="flex min-h-screen flex-col overflow-x-hidden">
       <div className="flex flex-col w-full items-center lg:items-start justify-center px-6 py-12 gap-6 lg:flex-row bg-white">
         <Link href={`/courses/${params.courseId}/chapters/${params.chapterId}`}>
-          <Button variant={"outline"}>
+          <Button variant={"underline"}>
             <ChevronLeft />
             back
           </Button>

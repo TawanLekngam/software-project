@@ -3,11 +3,14 @@ import Flashcard from "./_components/Flashcard";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 
 const flashcardPage = async ({
   params,
 }: {
   params: {
+    courseId: string;
+    chapterId: string;
     flashcardId: string;
   };
 }) => {
@@ -29,12 +32,18 @@ const flashcardPage = async ({
   return (
     <div className="flex min-h-screen flex-col">
       <div className="flex-grow">
-        <div className="container mx-auto justify-center max-w-[980px]">
-          <div className="flex flex-col items-center justify-center px-24 py-12 gap-12">
-            <Button variant={"outline"} onClick={router.back}>
-              <ChevronLeft />
-              back
-            </Button>
+        <div className="container mx-auto justify-center max-w-[900px]">
+          <div className="self-start pt-6">
+            <Link
+              href={`/courses/${params.courseId}/chapters/${params.chapterId}`}
+            >
+              <Button variant={"underline"}>
+                <ChevronLeft />
+                back
+              </Button>
+            </Link>
+          </div>
+          <div className="flex flex-col items-center justify-center px-24 py-6 gap-6">
             <h1 className="text-[32px] font-extrabold text-center text-black">
               Flashcard
             </h1>

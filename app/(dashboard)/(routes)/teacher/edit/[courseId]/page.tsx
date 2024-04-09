@@ -49,7 +49,7 @@ const EditPage = async ({ params }: { params: { courseId: string } }) => {
       <div className="flex min-h-screen flex-col overflow-x-hidden">
         <div className="flex flex-col w-full items-center lg:items-start justify-center px-6 gap-2 lg:gap-6 py-12 lg:flex-row bg-white h-full">
           <Link href={`/courses/${params.courseId}`}>
-            <Button variant={"outline"}>
+            <Button variant={"underline"}>
               <ChevronLeft />
               back
             </Button>

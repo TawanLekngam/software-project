@@ -33,7 +33,7 @@ const CourseHero = ({ course, userId, enroll }: CourseHeroProps) => {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col lg:flex-row items-center justify-center h-full gap-6 lg:items-start">
             <Button
-              variant={"outline"}
+              variant={"underline"}
               onClick={() => router.push(`/teacher/courses/`)}
             >
               <ChevronLeft />

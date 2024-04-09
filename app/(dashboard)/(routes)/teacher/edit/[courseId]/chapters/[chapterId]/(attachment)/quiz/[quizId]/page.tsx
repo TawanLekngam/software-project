@@ -61,7 +61,7 @@ const QuizPage = async ({
           <Link
             href={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}`}
           >
-            <Button variant={"outline"}>
+            <Button variant={"underline"}>
               <ChevronLeft />
               back
             </Button>
