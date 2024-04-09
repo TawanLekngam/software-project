@@ -1,4 +1,4 @@
-import { getCompletion } from "@/lib/completion";
+import { getCompletion } from "@/lib/gemini";
 import { NextResponse } from "next/server";
 import { QuestionDTO } from "@/dto/questionDTO";
 
