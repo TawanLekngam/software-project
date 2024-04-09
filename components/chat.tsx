@@ -1,50 +1,66 @@
-"use client";
+"use client"
 
-import { useState, useRef } from "react";
-import Draggable from "react-draggable";
-import { Resizable } from "re-resizable";
+import { useState, useRef } from "react"
+import Draggable from "react-draggable"
+import { Resizable } from "re-resizable"
 
-import { X, Send, Bot } from "lucide-react";
+import { X, Send, Bot } from "lucide-react"
 
-import { AIChatBox } from "@/components/chat-ai";
-import { UserChatBox } from "@/components/chat-user";
-import axios from "axios";
-import { set } from "zod";
+import { AIChatBox } from "@/components/chat-ai"
+import { UserChatBox } from "@/components/chat-user"
+import axios from "axios"
+import { set } from "zod"
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { Skeleton } from "@/components/ui/skeleton"
+
+import Image from "next/image"
+import ChatPic from "@/public/chat-pic.svg"
 
 interface ChatProps {
-  text: string;
-  type: string;
+  text: string
+  type: string
 }
 
 export const Chat = () => {
-  const [chat, setChat] = useState(false);
-  const [messages, setMessages] = useState<ChatProps[]>([]);
-  const [message, setMessage] = useState<ChatProps>({ text: "", type: "" });
-  let allMessages: ChatProps[] = messages;
+  const [chat, setChat] = useState(false)
+  const [messages, setMessages] = useState<ChatProps[]>([])
+  const [message, setMessage] = useState<ChatProps>({ text: "", type: "" })
+  let allMessages: ChatProps[] = messages
+  const [loading, setLoading] = useState(false)
 
-  const chatRef = useRef<null | HTMLDivElement>(null);
+  const chatRef = useRef<null | HTMLDivElement>(null)
 
   const getMessages = async () => {
-    return await axios.post("/api/chat-ai", { message: message.text });
-  };
+    return await axios.post("/api/chat-ai", { message: message.text })
+  }
 
   const submit = async (e: any) => {
-    e.preventDefault();
-    if (message?.text === "") return;
-    allMessages.push(message);
-    setMessages(allMessages);
-    setMessage({ text: "", type: "ai" });
+    e.preventDefault()
+    setLoading(true)
     setTimeout(() => {
       chatRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "end",
-      });
-    }, 100);
-    allMessages.push({ text: (await getMessages()).data, type: "ai" });
-    setMessages(allMessages);
-  };
+      })
+    }, 100)
+    if (message?.text === "") return
+    allMessages.push(message)
+    setMessages(allMessages)
+    setMessage({ text: "", type: "ai" })
+    let response = await getMessages()
+    setLoading(false)
+    setMessages((prevItem) => [
+      ...prevItem,
+      { text: response.data, type: "ai" },
+    ])
+    setTimeout(() => {
+      chatRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      })
+    }, 100)
+  }
 
   return (
     <>
@@ -76,18 +92,28 @@ export const Chat = () => {
               <X onClick={() => setChat(!chat)} />
             </div>
             <ScrollArea className="grow">
-            <div className="px-10 pt-10">
-              <div className="gap-5 flex flex-col" ref={chatRef}>
-                <AIChatBox AIText="Welcome to the Ai Teach! What can I help you with?" />
-                {messages.map((message, index) => {
-                  if (message.type === "ai") {
-                    return <AIChatBox key={index} AIText={message.text} />;
-                  }
-                  return <UserChatBox key={index} UserText={message.text} />;
-                })}
+              <div className="px-10 pt-10">
+                <div className="gap-5 flex flex-col" ref={chatRef}>
+                  <AIChatBox AIText="Welcome to the Ai Teach! What can I help you with?" />
+                  {messages.map((message, index) => {
+                    if (message.type === "ai") {
+                      return <AIChatBox key={index} AIText={message.text} />
+                    }
+                    return <UserChatBox key={index} UserText={message.text} />
+                  })}
+                  {loading && (
+                    <div className="min-w-[330px] p-5 mr-14 gap-5 flex bg-[#4F46E5] rounded-md items-start self-start">
+                      <Image
+                        className="w-[32px] float-right"
+                        src={ChatPic}
+                        alt={"ChatPic"}
+                      />
+                      <Skeleton className="w-[200px] h-[20px] rounded-full self-center" />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <ScrollBar orientation="vertical" />
+              <ScrollBar orientation="vertical" />
             </ScrollArea>
             <div className="relative mx-10 mb-10 mt-5">
               <input
@@ -100,7 +126,7 @@ export const Chat = () => {
                 }
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    submit(e);
+                    submit(e)
                   }
                 }}
               />
@@ -113,5 +139,5 @@ export const Chat = () => {
         </div>
       </Draggable>
     </>
-  );
-};
+  )
+}
