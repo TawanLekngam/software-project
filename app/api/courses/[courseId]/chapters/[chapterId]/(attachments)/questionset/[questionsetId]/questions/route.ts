@@ -12,7 +12,6 @@ export async function POST(
   try {
     const { userId } = auth();
 
-    console.log("[QUESTION]", params, userId)
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }

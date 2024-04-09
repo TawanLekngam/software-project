@@ -2,7 +2,7 @@
 
 import axios from "axios"
 import { PlusCircle, Pencil } from "lucide-react"
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
 import { Flashcard, Document } from "@prisma/client"
@@ -50,19 +50,22 @@ export const FlashcardForm = ({
   const [keyword, setKeyword] = useState("")
   const [openK, setOpenK] = useState(false)
   const [openD, setOpenD] = useState(false)
+  const [openDK, setOpenDK] = useState(false)
 
   const [clickedDocument, setClickedDocument] = useState(999)
 
   const router = useRouter()
 
   const [extractedText, setExtractedText] = useState("")
+  const [num_input, setNumInput] = useState("5")
 
   const extractText = async (url: string) => {
     try {
       const file = await fetch(url).then((res) => res.blob())
 
       const text = await pdfToText(file)
-      setExtractedText(text)
+      const cleanedText = text.replace(/['"`]/g, "")
+      setExtractedText(cleanedText)
     } catch (error) {
       console.error("Failed to extract text:", error)
     }
@@ -72,16 +75,18 @@ export const FlashcardForm = ({
 
   const createFlashcardFromKeyword = async (keyword: string) => {
     try {
+      toast.loading("Loading...")
       let value = {
         message: keyword,
       }
       let result = await axios.post(`/api/chat-ai/flashcard`, value)
       console.log("back", result.data.back, "front", result.data.front)
-
+      toast.dismiss()
       setOpenK(false)
       setKeyword("")
       await handleFlashcardAdd(result.data.front, result.data.back)
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
   }
@@ -90,24 +95,52 @@ export const FlashcardForm = ({
     keyword: string,
     index: number
   ) => {
-    setClickedDocument(index)
-    extractText(documents![index].url)
     try {
+      toast.loading("Loading...")
       let value = {
         message: keyword,
         document: extractedText,
       }
+
       let result = await axios.post(`/api/chat-ai/flashcard`, value)
-      setOpenD(false)
+      toast.dismiss()
+      setOpenDK(false)
       setKeyword("")
       await handleFlashcardAdd(result.data.front, result.data.back)
+      setExtractedText("")
+      setClickedDocument(999)
     } catch {
+      toast.dismiss()
+      toast.error("Something went wrong")
+    }
+  }
+
+  const createFlashcardSetFromDocument = async (num: string, index: number) => {
+    try {
+      toast.loading("Loading...")
+      let value = {
+        document: extractedText,
+        number: num,
+      }
+
+      let result = await axios.post(`/api/chat-ai/flashcardset`, value)
+      toast.dismiss()
+      setOpenD(false)
+
+      for (let i = 0; i < result.data.length; i++) {
+        await handleFlashcardAdd(result.data[i].front, result.data[i].back)
+      }
+      setExtractedText("")
+      setClickedDocument(999)
+      router.refresh()
+    } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
   }
 
   const handleFlashcardAdd = async (front: any, back: any) => {
-    let newCard
+    let newCard: any
     let value = {
       front: front,
       back: back,
@@ -121,14 +154,18 @@ export const FlashcardForm = ({
       toast.dismiss()
       toast.success("Flashcard created")
       newCard = await result.data
+      console.log(cards.length)
+      setCards((prevItems) => (
+        [newCard, ...prevItems]
+      ))
+      setClickedCard(0)
+      setFront(newCard.front)
+      setBack(newCard.back)
       router.refresh()
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
-    setCards([newCard, ...cards])
-    setClickedCard(0)
-    setFront(newCard.front)
-    setBack(newCard.back)
   }
 
   const handleFlashcardCancel = () => {
@@ -159,6 +196,7 @@ export const FlashcardForm = ({
       toggleEdit()
       router.refresh()
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
   }
@@ -174,6 +212,7 @@ export const FlashcardForm = ({
       toast.success("Flashcard deleted")
       router.refresh()
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
     const items = [...cards]
@@ -192,23 +231,29 @@ export const FlashcardForm = ({
         setBack(cards[clickedCard + 1].back!))
   }
 
+  React.useEffect(() => {
+    console.log("Cards check:", cards.length)
+  }, [cards])
+
   return (
     <div className="flex flex-col-reverse items-center lg:items-start gap-8 lg:flex-row">
       <div className="flex flex-col gap-4 w-full max-w-sm lg:max-w-xs">
         <hr className="lg:hidden mb-2 border-t-2 rounded-md border-gray-200" />
-        <h3 className="text-lg font-medium">Create Flashcard with AI from:</h3>
-        <div className="flex flex-row gap-4">
+        <h3 className="text-lg font-medium">
+          Create a Flashcard with AI from:
+        </h3>
+        <div className="flex flex-row gap-4 ">
           <Dialog open={openK} onOpenChange={setOpenK}>
             <DialogTrigger asChild>
               <Button variant="cancel" disabled={isEditing}>
                 Keyword
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="max-w-[425px] rounded-md">
               <DialogHeader className="gap-2 pt-2">
                 <DialogTitle>Create Flashcard with AI</DialogTitle>
                 <DialogDescription>
-                  Write a keyword to create a new flash card
+                  Write a keyword to create a new flashcard
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 pb-4">
@@ -235,17 +280,18 @@ export const FlashcardForm = ({
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          <Dialog open={openD} onOpenChange={setOpenD}>
+          <Dialog open={openDK} onOpenChange={setOpenDK}>
             <DialogTrigger asChild>
               <Button variant="cancel" disabled={isEditing}>
                 Document
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="max-w-[425px] rounded-md">
               <DialogHeader className="gap-2 pt-2">
                 <DialogTitle>Create Flashcard with AI</DialogTitle>
                 <DialogDescription>
-                  Choose a document to create a new flash card
+                  Write a keyword and choose a document to create a new
+                  flashcard
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 pb-2">
@@ -269,7 +315,9 @@ export const FlashcardForm = ({
                       ? "bg-[#80489C]/90 text-white"
                       : "bg-slate-200"
                   }`}
-                  onClick={(e) => createFlashcardFromDocument(keyword, i)}
+                  onClick={(e) => (
+                    setClickedDocument(i), extractText(documents[i].url)
+                  )}
                 >
                   {document.title}
                 </button>
@@ -281,9 +329,116 @@ export const FlashcardForm = ({
                   No document file in this chapter
                 </div>
               )}
+              <DialogFooter>
+                <Button
+                  disabled={
+                    keyword != "" && clickedDocument != 999
+                      ? false
+                      : true && extractedText != ""
+                  }
+                  type="submit"
+                  variant="primary"
+                  size="sm_l"
+                  onClick={(e) =>
+                    createFlashcardFromDocument(keyword, clickedDocument)
+                  }
+                  className="mt-2"
+                >
+                  Save
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
+        <h3 className="text-lg font-medium">
+          Create a Flashcard set with AI from:
+        </h3>
+        <Dialog open={openD} onOpenChange={setOpenD}>
+          <DialogTrigger asChild>
+            <Button variant="cancel" disabled={isEditing}>
+              Document
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-[425px] rounded-md">
+            <DialogHeader className="gap-2 pt-2">
+              <DialogTitle>Create Flashcard set with AI</DialogTitle>
+              <DialogDescription>
+                Choose a document to create a new flashcard set
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex gap-4 pb-2 items-center">
+              <Label htmlFor="name" className="text-left">
+                Number of flashcards:
+              </Label>
+              <input
+                type="number"
+                id="num_input"
+                name="num_input"
+                min="1"
+                max="10"
+                defaultValue={num_input}
+                value={num_input}
+                className="pl-2"
+                onChange={(e) => {
+                  setNumInput(e.target.value)
+                }}
+              />{" "}
+              <p
+                className={`text-sm text-red-400 ${
+                  Number(num_input) < 11 && 0 < Number(num_input)
+                    ? "hidden"
+                    : ""
+                } `}
+              >
+                Number is not valid!
+              </p>
+            </div>
+            <hr className="mb-2 border-t-2 rounded-md border-gray-200" />
+            {documents?.map((document, i) => (
+              <button
+                key={i}
+                className={`font-medium p-4 h-[56px] rounded-md ${
+                  clickedDocument === i
+                    ? "bg-[#80489C]/90 text-white"
+                    : "bg-slate-200"
+                }`}
+                onClick={(e) => (
+                  setClickedDocument(i), extractText(documents[i].url)
+                )}
+              >
+                {document.title}
+              </button>
+            ))}
+            {documents!.length > 0 ? (
+              ""
+            ) : (
+              <div className="text-md text-center text-slate-500 italic">
+                No document file in this chapter
+              </div>
+            )}
+            <DialogFooter>
+              <Button
+                disabled={
+                  Number(num_input) < 11 &&
+                  0 < Number(num_input) &&
+                  clickedDocument != 999 &&
+                  extractedText != ""
+                    ? false
+                    : true
+                }
+                type="submit"
+                variant="primary"
+                size="sm_l"
+                onClick={(e) =>
+                  createFlashcardSetFromDocument(num_input, clickedDocument)
+                }
+                className="mt-2"
+              >
+                Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         <div className="flex flex-row justify-between">
           <h3 className="text-lg font-medium">Card list</h3>
           <Button

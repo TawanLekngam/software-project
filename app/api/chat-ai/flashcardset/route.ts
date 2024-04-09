@@ -19,7 +19,11 @@ export async function POST(req: Request) {
       `give ${number} interest keywords for the following document: ${document} in a array format (JSON). example ["keyword1", "keyword2", "keyword3"]`
     );
 
-    const keyWords = completion.replace(/\\/g, "");
+    // let keyWords = completion.replace(/\\/g, "");
+    const start_index = completion.indexOf("[");
+    const end_index = completion.indexOf("]");
+    let keyWords = completion.slice(start_index, end_index + 1);
+
     const keywordsArray = JSON.parse(keyWords);
 
     const keywordWithDefinitions = await Promise.all(
