@@ -1,8 +1,15 @@
 import { db } from "@/lib/db";
 import Quiz from "./_components/Quiz";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 
-const quizPage = async ({ params }: { params: { quizId: string } }) => {
+const quizPage = async ({
+  params,
+}: {
+  params: { courseId: string; chapterId: string; quizId: string };
+}) => {
   const quiz = await db.questionSet.findUnique({
     where: {
       id: params.quizId,
@@ -31,7 +38,17 @@ const quizPage = async ({ params }: { params: { quizId: string } }) => {
     <div className="flex min-h-screen flex-col">
       <div className="flex-grow">
         <div className="container mx-auto justify-center max-w-[900px]">
-          <div className="flex flex-col items-center justify-center px-24 py-12 gap-12">
+          <div className="self-start pt-6">
+            <Link
+              href={`/courses/${params.courseId}/chapters/${params.chapterId}`}
+            >
+              <Button variant={"underline"}>
+                <ChevronLeft />
+                back
+              </Button>
+            </Link>
+          </div>
+          <div className="flex flex-col items-center justify-center px-24 py-6 gap-6">
             <h1 className="text-[32px] font-extrabold text-center text-black">
               Quiz
             </h1>
