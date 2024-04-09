@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { getCompletion } from "@/lib/gemini";
 import { FlashcardDTO } from "@/dto/flashcardDTO";
 
@@ -7,13 +8,11 @@ export async function POST(req: Request) {
     const { document, number } = await req.json();
 
     if (!document || !number) {
-      return new NextResponse("Bad Request", { status: 400 });
+      return new NextResponse("Bad request", { status: 400 });
     }
 
-    if (number > 10) {
-      return new NextResponse("Number of keywords should be less than 10", {
-        status: 400,
-      });
+    if (number > 10 || number < 1) {
+      return new NextResponse("Bad request", { status: 400 });
     }
 
     const completion = await getCompletion(
