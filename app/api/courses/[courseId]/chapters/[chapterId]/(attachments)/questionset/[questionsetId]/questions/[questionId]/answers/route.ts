@@ -27,7 +27,7 @@ export async function POST(
     }
 
     const values = await req.json();
-    console.log("[ANSWER]", values);
+
     const answer = await db.answer.create({
       data: {
         questionId: params.questionId,
