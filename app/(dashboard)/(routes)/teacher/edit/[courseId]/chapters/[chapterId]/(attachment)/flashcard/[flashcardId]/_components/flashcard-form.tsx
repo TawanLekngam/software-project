@@ -93,7 +93,6 @@ export const FlashcardForm = ({
     keyword: string,
     index: number
   ) => {
-    setClickedDocument(index)
     await extractText(documents![index].url)
     try {
       let value = {
@@ -104,13 +103,14 @@ export const FlashcardForm = ({
       setOpenDK(false)
       setKeyword("")
       await handleFlashcardAdd(result.data.front, result.data.back)
+      setClickedDocument(999)
     } catch {
       toast.error("Something went wrong")
     }
   }
 
   const createFlashcardSetFromDocument = async (num: string, index: number) => {
-    setClickedDocument(index)
+    
     await extractText(documents![index].url)
     try {
       let value = {
@@ -125,6 +125,7 @@ export const FlashcardForm = ({
       //   await handleFlashcardAdd(result.data[i].front, result.data[i].back)
       // }
       // router.refresh()
+      setClickedDocument(999)
     } catch {
       toast.error("Something went wrong")
     }
@@ -299,7 +300,7 @@ export const FlashcardForm = ({
                       ? "bg-[#80489C]/90 text-white"
                       : "bg-slate-200"
                   }`}
-                  onClick={(e) => createFlashcardFromDocument(keyword, i)}
+                  onClick={(e) => setClickedDocument(i)}
                 >
                   {document.title}
                 </button>
@@ -311,6 +312,22 @@ export const FlashcardForm = ({
                   No document file in this chapter
                 </div>
               )}
+               <DialogFooter>
+                  <Button
+                    disabled={
+                      keyword != "" && clickedDocument != 999 ? false : true
+                    }
+                    type="submit"
+                    variant="primary"
+                    size="sm_l"
+                    onClick={(e) =>
+                      createFlashcardFromDocument(keyword, clickedDocument)
+                    }
+                    className="mt-2"
+                  >
+                    Save
+                  </Button>
+                </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
@@ -366,7 +383,7 @@ export const FlashcardForm = ({
                     ? "bg-[#80489C]/90 text-white"
                     : "bg-slate-200"
                 }`}
-                onClick={(e) => createFlashcardSetFromDocument(num_input, i)}
+                onClick={(e) => setClickedDocument(i)}
               >
                 {document.title}
               </button>
@@ -378,6 +395,26 @@ export const FlashcardForm = ({
                 No document file in this chapter
               </div>
             )}
+            <DialogFooter>
+                <Button
+                  disabled={
+                    Number(num_input) < 11 &&
+                    0 < Number(num_input) &&
+                    clickedDocument != 999
+                      ? false
+                      : true
+                  }
+                  type="submit"
+                  variant="primary"
+                  size="sm_l"
+                  onClick={(e) =>
+                    createFlashcardSetFromDocument(num_input, clickedDocument)
+                  }
+                  className="mt-2"
+                >
+                  Save
+                </Button>
+              </DialogFooter>
           </DialogContent>
         </Dialog>
         <div className="flex flex-row justify-between">
