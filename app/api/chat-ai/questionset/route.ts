@@ -30,25 +30,25 @@ export async function POST(req: Request) {
             answers: [
               {
                 text: await getCompletion(
-                  `create a correct answer for ${question}`
+                  `create a correct answer (short answer) for ${question}`
                 ),
                 isCorrect: true,
               },
               {
                 text: await getCompletion(
-                  `create a wrong answer for ${question}`
+                  `create a wrong answer (short answer) for ${question}`
                 ),
                 isCorrect: false,
               },
               {
                 text: await getCompletion(
-                  `create a wrong answer for ${question}`
+                  `create a wrong answer (short answer) for ${question}`
                 ),
                 isCorrect: false,
               },
               {
                 text: await getCompletion(
-                  `create a wrong answer for ${question}`
+                  `create a wrong answer (short answer) for ${question}`
                 ),
                 isCorrect: false,
               },
