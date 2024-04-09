@@ -175,6 +175,7 @@ export const QuizForm = ({
 
       router.refresh()
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
   }
@@ -191,6 +192,7 @@ export const QuizForm = ({
       toast.success("Question deleted")
       router.refresh()
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
     questions.splice(index, 1)
@@ -249,6 +251,7 @@ export const QuizForm = ({
       toggleEdit()
       router.refresh()
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
   }

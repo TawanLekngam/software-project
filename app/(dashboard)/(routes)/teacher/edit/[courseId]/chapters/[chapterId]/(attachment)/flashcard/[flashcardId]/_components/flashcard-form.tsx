@@ -123,6 +123,7 @@ export const FlashcardForm = ({
       newCard = await result.data
       router.refresh()
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
     setCards([newCard, ...cards])
@@ -159,6 +160,7 @@ export const FlashcardForm = ({
       toggleEdit()
       router.refresh()
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
   }
@@ -174,6 +176,7 @@ export const FlashcardForm = ({
       toast.success("Flashcard deleted")
       router.refresh()
     } catch {
+      toast.dismiss()
       toast.error("Something went wrong")
     }
     const items = [...cards]
