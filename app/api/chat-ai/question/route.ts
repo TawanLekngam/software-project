@@ -4,9 +4,38 @@ import { QuestionDTO } from "@/dto/questionDTO";
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
+    const { message, document } = await req.json();
 
-    if (!message) {
+    if (!message && document) {
+      const questionCompletion = await getCompletion(
+        `create a question for ${document}`
+      );
+
+      const questionWithAnswer = await Promise.all([
+        questionCompletion,
+        getCompletion(
+          `create a correct answer for ${questionCompletion} that relate to this document:${document}`
+        ).then((text) => ({ text, isCorrect: true })),
+        getCompletion(
+          `create a wrong answer for ${questionCompletion} that relate to this document:${document}`
+        ).then((text) => ({ text, isCorrect: false })),
+        getCompletion(
+          `create a wrong answer for ${questionCompletion} that relate to this document:${document}`
+        ).then((text) => ({ text, isCorrect: false })),
+        getCompletion(
+          `create a wrong answer for ${questionCompletion} that relate to this document:${document}`
+        ).then((text) => ({ text, isCorrect: false })),
+      ]);
+
+      const [question, ...answers] = questionWithAnswer;
+      const questionDTO = {
+        question,
+        answers,
+      };
+      return new NextResponse(JSON.stringify(questionDTO));
+    }
+
+    if (!message && !document) {
       return new NextResponse("Bad request", { status: 400 });
     }
 
