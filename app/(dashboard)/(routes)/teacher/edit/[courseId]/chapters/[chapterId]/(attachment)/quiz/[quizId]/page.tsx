@@ -47,6 +47,12 @@ const QuizPage = async ({
     },
   });
 
+  const documents = await db.document.findMany({
+    where: {
+      chapterId: params.chapterId,
+    },
+  });
+
   if (!questionSet) {
     return redirect("/");
   }
@@ -93,6 +99,7 @@ const QuizPage = async ({
             courseId={params.courseId}
             chapterId={params.chapterId}
             questionsetId={params.quizId}
+            documents={documents}
           />
         </div>
       </div>

@@ -5,7 +5,7 @@ import { useState, SetStateAction } from "react"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
 
-import { Question, Answer } from "@prisma/client"
+import { Question, Answer, Document } from "@prisma/client"
 
 import { PlusCircle, Pencil } from "lucide-react"
 
@@ -16,6 +16,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Button } from "@/components/ui/button"
 
 import { cn } from "@/lib/utils"
+
+import pdfToText from "react-pdftotext"
 
 import {
   Carousel,
@@ -43,6 +45,7 @@ interface QuizFormProps {
   courseId: string
   chapterId: string
   questionsetId: string
+  documents: Document[] | null
 }
 
 export const QuizForm = ({
@@ -50,6 +53,7 @@ export const QuizForm = ({
   courseId,
   chapterId,
   questionsetId,
+  documents,
 }: QuizFormProps) => {
   const [data, setData] = useState(initialData)
   const [questions, setQuestions] = useState<
@@ -69,8 +73,26 @@ export const QuizForm = ({
   const [keyword, setKeyword] = useState("")
   const [openK, setOpenK] = useState(false)
   const [openD, setOpenD] = useState(false)
+  const [openDK, setOpenDK] = useState(false)
+
+  const [clickedDocument, setClickedDocument] = useState(999)
 
   const router = useRouter()
+
+  const [extractedText, setExtractedText] = useState("")
+  const [num_input, setNumInput] = useState("5")
+
+  const extractText = async (url: string) => {
+    try {
+      const file = await fetch(url).then((res) => res.blob())
+
+      const text = await pdfToText(file)
+      const cleanedText = text.replace(/['"`]/g, "")
+      setExtractedText(cleanedText)
+    } catch (error) {
+      console.error("Failed to extract text:", error)
+    }
+  }
 
   const toggleEdit = () => setIsEditing((current) => !current)
 
@@ -126,6 +148,44 @@ export const QuizForm = ({
       setOpenK(false)
       setKeyword("")
       await handleQuestionAdd(result.data.question, result.data.answers)
+    } catch {
+      toast.error("Something went wrong")
+    }
+  }
+
+  const createQuestionFromDocument = async (keyword: string, index: number) => {
+    setClickedDocument(index)
+    await extractText(documents![index].url)
+    try {
+      let value = {
+        message: keyword,
+        document: extractedText,
+      }
+      let result = await axios.post(`/api/chat-ai/question`, value)
+      setOpenDK(false)
+      setKeyword("")
+      await handleQuestionAdd(result.data.question, result.data.answers)
+    } catch {
+      toast.error("Something went wrong")
+    }
+  }
+
+  const createQuestionSetFromDocument = async (num: string, index: number) => {
+    setClickedDocument(index)
+    await extractText(documents![index].url)
+    try {
+      let value = {
+        document: extractedText,
+        number: num,
+      }
+
+      let result = await axios.post(`/api/chat-ai/questionset`, value)
+      setOpenD(false)
+      console.log(result.data)
+      // for (let i = 0; i < result.data.length; i++) {
+      //   await handleFlashcardAdd(result.data[i].front, result.data[i].back)
+      // }
+      // router.refresh()
     } catch {
       toast.error("Something went wrong")
     }
@@ -277,82 +337,166 @@ export const QuizForm = ({
   }, [api])
 
   return (
-    <div className="w-4/5 flex flex-col self-center gap-8">
-      <div className="flex flex-col md:flex-row items-center gap-4">
-        <h3 className="text-lg font-medium">Create Question with AI from:</h3>
-        <div className="flex flex-row gap-4">
-          <Dialog open={openK} onOpenChange={setOpenK}>
-            <DialogTrigger asChild>
-              <Button variant="cancel" disabled={isEditing}>
-                Keyword
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader className="gap-2 pt-2">
-                <DialogTitle>Create Question with AI</DialogTitle>
-                <DialogDescription>
-                  Write a keyword to create a new question
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <Label htmlFor="name" className="text-left">
+    <div className="w-4/5 flex flex-col self-center gap-6">
+      <div className="flex flex-col lg:flex-row justify-center gap-6 lg:gap-8">
+        <div className="flex flex-col items-center gap-4">
+          <h3 className="text-lg font-medium">
+            Create a Question with AI from:
+          </h3>
+          <div className="flex flex-row gap-4">
+            <Dialog open={openK} onOpenChange={setOpenK}>
+              <DialogTrigger asChild>
+                <Button variant="cancel" disabled={isEditing}>
                   Keyword
-                </Label>
-                <Input
-                  id="name"
-                  placeholder="e.g. 'Keyword'"
-                  className="col-span-3"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                />
-              </div>
-              <DialogFooter>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm_l"
-                  onClick={(e) => createQuestionFromKeyword(keyword)}
-                >
-                  Save
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader className="gap-2 pt-2">
+                  <DialogTitle>Create Question with AI</DialogTitle>
+                  <DialogDescription>
+                    Write a keyword to create a new question
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 pb-4">
+                  <Label htmlFor="name" className="text-left">
+                    Keyword
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="e.g. 'Keyword'"
+                    className="col-span-3"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm_l"
+                    onClick={(e) => createQuestionFromKeyword(keyword)}
+                  >
+                    Save
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog open={openDK} onOpenChange={setOpenDK}>
+              <DialogTrigger asChild>
+                <Button variant="cancel" disabled={isEditing}>
+                  Document
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-[425px] rounded-md">
+                <DialogHeader className="gap-2 pt-2">
+                  <DialogTitle>Create Question with AI</DialogTitle>
+                  <DialogDescription>
+                    Write a keyword and choose a document to create a new
+                    question
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 pb-2">
+                  <Label htmlFor="name" className="text-left">
+                    Keyword
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="e.g. 'Keyword'"
+                    className="col-span-3"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                  />
+                </div>
+                <hr className="mb-2 border-t-2 rounded-md border-gray-200" />
+                {documents?.map((document, i) => (
+                  <button
+                    key={i}
+                    className={`font-medium p-4 h-[56px] rounded-md ${
+                      clickedDocument === i
+                        ? "bg-[#80489C]/90 text-white"
+                        : "bg-slate-200"
+                    }`}
+                    onClick={(e) => createQuestionFromDocument(keyword, i)}
+                  >
+                    {document.title}
+                  </button>
+                ))}
+                {documents!.length > 0 ? (
+                  ""
+                ) : (
+                  <div className="text-md text-center text-slate-500 italic">
+                    No document file in this chapter
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+        <div className="flex flex-col gap-4 items-center lg:border-l-2 lg:border-gray-200 lg:ounded-md lg:mb-2 lg:pl-8">
+          <h3 className="text-lg font-medium">
+            Create a Question set with AI from:
+          </h3>
           <Dialog open={openD} onOpenChange={setOpenD}>
             <DialogTrigger asChild>
               <Button variant="cancel" disabled={isEditing}>
                 Document
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="max-w-[425px] rounded-md">
               <DialogHeader className="gap-2 pt-2">
-                <DialogTitle>Create Question with AI</DialogTitle>
+                <DialogTitle>Create Question set with AI</DialogTitle>
                 <DialogDescription>
-                  Choose a document to create a new question
+                  Choose a document to create a new question set
                 </DialogDescription>
               </DialogHeader>
-              {/* <div className="grid gap-4 py-4">
+              <div className="flex gap-4 pb-2 items-center">
                 <Label htmlFor="name" className="text-left">
-                  Keyword
+                  Number of questions:
                 </Label>
-                <Input
-                  id="name"
-                  placeholder="e.g. 'Keyword'"
-                  className="col-span-3"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                />
-              </div> */}
-              <DialogFooter>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm_l"
-                  // onClick={(e) => createFlashcard(keyword)}
+                <input
+                  type="number"
+                  id="num_input"
+                  name="num_input"
+                  min="1"
+                  max="10"
+                  defaultValue={num_input}
+                  value={num_input}
+                  className="pl-2"
+                  onChange={(e) => {
+                    setNumInput(e.target.value)
+                  }}
+                />{" "}
+                <p
+                  className={`text-sm text-red-400 ${
+                    Number(num_input) < 11 && 0 < Number(num_input)
+                      ? "hidden"
+                      : ""
+                  } `}
                 >
-                  Save
-                </Button>
-              </DialogFooter>
+                  Number is not valid!
+                </p>
+              </div>
+              <hr className="mb-2 border-t-2 rounded-md border-gray-200" />
+              {documents?.map((document, i) => (
+                <button
+                  key={i}
+                  className={`font-medium p-4 h-[56px] rounded-md ${
+                    clickedDocument === i
+                      ? "bg-[#80489C]/90 text-white"
+                      : "bg-slate-200"
+                  }`}
+                  onClick={(e) => createQuestionSetFromDocument(num_input, i)}
+                >
+                  {document.title}
+                </button>
+              ))}
+              {documents!.length > 0 ? (
+                ""
+              ) : (
+                <div className="text-md text-center text-slate-500 italic">
+                  No document file in this chapter
+                </div>
+              )}
             </DialogContent>
           </Dialog>
         </div>
