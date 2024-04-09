@@ -14,16 +14,16 @@ export async function POST(req: Request) {
       const questionWithAnswer = await Promise.all([
         questionCompletion,
         getCompletion(
-          `create a correct answer for ${questionCompletion} that relate to this document:${document}`
+          `create a correct answer (short answer) for ${questionCompletion} that relate to this document:${document}`
         ).then((text) => ({ text, isCorrect: true })),
         getCompletion(
-          `create a wrong answer for ${questionCompletion} that relate to this document:${document}`
+          `create a wrong answer (short answer) for ${questionCompletion} that relate to this document:${document}`
         ).then((text) => ({ text, isCorrect: false })),
         getCompletion(
-          `create a wrong answer for ${questionCompletion} that relate to this document:${document}`
+          `create a wrong answer (short answer) for ${questionCompletion} that relate to this document:${document}`
         ).then((text) => ({ text, isCorrect: false })),
         getCompletion(
-          `create a wrong answer for ${questionCompletion} that relate to this document:${document}`
+          `create a wrong answer (short answer) for ${questionCompletion} that relate to this document:${document}`
         ).then((text) => ({ text, isCorrect: false })),
       ]);
 
@@ -40,19 +40,19 @@ export async function POST(req: Request) {
     }
 
     const answer1Completion = await getCompletion(
-      `create a correct answer for ${message}`
+      `create a correct answer (short answer) for ${message}`
     );
 
     const answer2Completion = await getCompletion(
-      `create a wrong answer for ${message}`
+      `create a wrong answer (short answer) for ${message}`
     );
 
     const answer3Completion = await getCompletion(
-      `create a  wrong  answer for ${message}`
+      `create a  wrong  answer (short answer) for ${message}`
     );
 
     const answer4Completion = await getCompletion(
-      `create a  wrong answer for ${message}`
+      `create a  wrong answer (short answer) for ${message}`
     );
 
     const question: QuestionDTO = {
