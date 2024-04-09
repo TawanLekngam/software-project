@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { PencilRuler } from "lucide-react";
+import { ChevronLeft, PencilRuler } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { IconBadge } from "@/components/icon-badge";
@@ -10,6 +10,7 @@ import { QuizTitleForm } from "./_components/quiz-title-form";
 import { QuizForm } from "./_components/quiz-form";
 import { Actions } from "./_components/actions";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const QuizPage = async ({
   params,
@@ -57,6 +58,14 @@ const QuizPage = async ({
       )}
       <div className="flex flex-col items-center justify-center w-full px-4 py-16 gap-8 ">
         <div className="flex items-center w-4/5 max-w-7xl justify-between">
+          <Link
+            href={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}`}
+          >
+            <Button variant={"underline"}>
+              <ChevronLeft />
+              back
+            </Button>
+          </Link>
           <div className="flex flex-row gap-2 items-center justify-center">
             <PencilRuler />
             <h1 className="text-2xl font-medium">Question set</h1>

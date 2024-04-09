@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { GalleryVerticalEnd } from "lucide-react";
+import { ChevronLeft, GalleryVerticalEnd } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { IconBadge } from "@/components/icon-badge";
@@ -10,6 +10,7 @@ import { FlashcarddeckTitleForm } from "./_components/flashcarddeck-title-form";
 import { FlashcardForm } from "./_components/flashcard-form";
 import { Actions } from "./_components/actions";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const FlashcardPage = async ({
   params,
@@ -57,11 +58,17 @@ const FlashcardPage = async ({
       )}
       <div className="flex flex-col items-center justify-center px-4 py-16 gap-8">
         <div className="flex items-center w-4/5 max-w-7xl justify-between">
+          <Link
+            href={`/teacher/edit/${params.courseId}/chapters/${params.chapterId}`}
+          >
+            <Button variant={"underline"}>
+              <ChevronLeft />
+              back
+            </Button>
+          </Link>
           <div className="flex flex-row gap-2 items-center justify-center">
-            {/* <div className="flex items-center gap-x-2"> */}
             <GalleryVerticalEnd />
             <h1 className="text-2xl font-medium">Flash Card</h1>
-            {/* </div> */}
           </div>
           <Actions
             // disabled={!isComplete}
@@ -72,7 +79,6 @@ const FlashcardPage = async ({
             isPublished={flashcarddeck.isPublic}
           />
         </div>
-        {/* <div className="grid gap-6 w-full justify-center"> */}
         <div className="flex flex-col gap-8 w-4/5 max-w-7xl justify-center">
           <FlashcarddeckTitleForm
             initialData={flashcarddeck}

@@ -1,36 +1,44 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Course } from "@prisma/client"
-import Link from "next/link"
-import axios from "axios"
-import toast from "react-hot-toast"
-import { useRouter } from "next/navigation"
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
+import { Course } from "@prisma/client";
+import Link from "next/link";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface CourseHeroProps {
-  course: Course
-  userId: string | null
-  enroll: string | null
+  course: Course;
+  userId: string | null;
+  enroll: string | null;
 }
 
 const CourseHero = ({ course, userId, enroll }: CourseHeroProps) => {
-  const router = useRouter()
+  const router = useRouter();
 
   const onEnroll = async (value: string) => {
     try {
-      await axios.post(`/api/courses/${course.id}/checkout`)
-      toast.success("Course enrolled")
-      router.refresh()
+      await axios.post(`/api/courses/${course.id}/checkout`);
+      toast.success("Course enrolled");
+      router.refresh();
     } catch {
-      toast.error("Something went wrong")
+      toast.error("Something went wrong");
     }
-  }
+  };
   return (
     <div>
       <div className="flex flex-col w-screen items-center justify-center px-12 py-12 lg:flex-row bg-white">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col lg:flex-row items-center justify-center h-full gap-6 lg:items-start">
+            <Button
+              variant={"underline"}
+              onClick={() => router.push(`/teacher/courses/`)}
+            >
+              <ChevronLeft />
+              back
+            </Button>
             <div className="w-[270px] h-[200px]">
               <img
                 src={course.imageUrl ?? "./_componets/default.svg"}
@@ -70,7 +78,7 @@ const CourseHero = ({ course, userId, enroll }: CourseHeroProps) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CourseHero
+export default CourseHero;
