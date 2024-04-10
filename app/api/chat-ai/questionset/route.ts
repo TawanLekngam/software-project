@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     }
 
     const completion = await getCompletion(
-      `give ${number} questions for the following document: ${document} in a array format (JSON) without question number. example ["question1", "question2", "question3"]`
+      `give ${number} questions for the following document: ${document} . Give only the content of the question in a array format without question number. example ["what is ...", "where is ...", "This is ..."]`
     );
 
     const questions = completion.replace(/\\/g, "");

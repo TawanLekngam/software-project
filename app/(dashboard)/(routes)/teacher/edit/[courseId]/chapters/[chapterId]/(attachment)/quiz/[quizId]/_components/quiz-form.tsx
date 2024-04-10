@@ -233,12 +233,12 @@ export const QuizForm = ({
       setData((prevItems) => ([newQuestion, ...prevItems]))
       setCount((prevItems) => (prevItems+1))
       answerSet
-        ? (setAnswers(["0", ...answers]),
-          setSelectedValue("0"),
-          setCorrectAnswer("0"))
-        : (setAnswers(["5", ...answers]),
-          setSelectedValue("5"),
-          setCorrectAnswer("5"))
+        ? (setAnswers((prevItems) => (["0", ...prevItems])),
+          setSelectedValue((prevItems) => ("0")),
+          setCorrectAnswer((prevItems) => ("0")))
+        : (setAnswers((prevItems) => (["0", ...prevItems])),
+          setSelectedValue((prevItems) => ("5")),
+          setCorrectAnswer((prevItems) => ("5")))
       api?.scrollTo(0)
 
       router.refresh()
