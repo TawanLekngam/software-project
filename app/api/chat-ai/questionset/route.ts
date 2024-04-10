@@ -15,12 +15,24 @@ export async function POST(req: Request) {
       return new NextResponse("Bar request", { status: 400 });
     }
 
-    const completion = await getCompletion(
-      `give ${number} questions for the following document: ${document} . Give only the content of the question in a array format without question number. example ["what is ...", "where is ...", "This is ..."]`
-    );
+    
+    let questionsArray;
+    let parsingSuccessful = false;
 
-    const questions = completion.replace(/\\/g, "");
-    const questionsArray = JSON.parse(questions);
+    while (!parsingSuccessful) {
+      try {
+        const completion = await getCompletion(
+          `give ${number} questions for the following document: ${document} . Give only the content of the question in a array format without question number. example ["what is ...", "where is ...", "This is ..."]`
+        );
+
+        const questions = completion.replace(/\\/g, "");
+        questionsArray = JSON.parse(questions);
+
+        parsingSuccessful = true;
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+      }
+    }
 
     const questionsWithAnswers = await Promise.all(
       questionsArray.map(
