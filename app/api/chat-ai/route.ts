@@ -6,7 +6,7 @@ export async function POST(req: Request) {
     const { message, document } = await req.json();
 
     if (!message) {
-      return new NextResponse("Bad Request", { status: 400 });
+      return new NextResponse("Bad request", { status: 400 });
     }
 
     const completion = document
